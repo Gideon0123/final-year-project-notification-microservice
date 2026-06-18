@@ -24,7 +24,7 @@ public class EmailServiceImpl implements EmailService {
 
     }
     @Recover
-    public void recoverVerificationEmail(
+    public void recoverWelcomeEmail(
             Exception ex,
             UserRegisteredEvent event
     ) {
@@ -38,6 +38,13 @@ public class EmailServiceImpl implements EmailService {
     public void sendVerificationEmail(VerificationEmailRequestedEvent event) {
 
     }
+    @Recover
+    public void recoverVerificationEmail(
+            Exception ex,
+            VerificationEmailRequestedEvent event
+    ) {
+        log.error("Email failed permanently {}", event.email(), ex);
+    }
 
     @Retryable(
             retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 3000)
@@ -45,6 +52,13 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendVerifiedEmail(UserVerifiedEvent event) {
 
+    }
+    @Recover
+    public void recoverVerifiedEmail(
+            Exception ex,
+            UserVerifiedEvent event
+    ) {
+        log.error("Email failed permanently {}", event.email(), ex);
     }
 
     @Retryable(
@@ -54,6 +68,13 @@ public class EmailServiceImpl implements EmailService {
     public void sendPasswordResetEmail(PasswordResetRequestedEvent event) {
 
     }
+    @Recover
+    public void recoverPasswordResetEmail(
+            Exception ex,
+            PasswordResetRequestedEvent event
+    ) {
+        log.error("Email failed permanently {}", event.email(), ex);
+    }
 
     @Retryable(
             retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 3000)
@@ -61,5 +82,12 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendGoodbyeEmail(UserDeletedEvent event) {
 
+    }
+    @Recover
+    public void recoverGoodbyeEmail(
+            Exception ex,
+            UserDeletedEvent event
+    ) {
+        log.error("Email failed permanently {}", event.email(), ex);
     }
 }
