@@ -1,31 +1,12 @@
 package com.example.notification_service.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
+import com.example.notification_service.dto.event.*;
 
-@Service
-@RequiredArgsConstructor
-public class EmailService {
+public interface EmailService {
 
-    private final JavaMailSender mailSender;
-
-    public void send(
-            String to,
-            String subject,
-            String body) throws MessagingException {
-
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(body,true);
-
-        mailSender.send(mimeMessage);
-    }
+    void sendWelcomeEmail(UserRegisteredEvent event);
+    void sendVerificationEmail(VerificationEmailRequestedEvent event);
+    void sendVerifiedEmail(UserVerifiedEvent event);
+    void sendPasswordResetEmail(PasswordResetRequestedEvent event);
+    void sendGoodbyeEmail(UserDeletedEvent event);
 }

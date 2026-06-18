@@ -1,40 +1,51 @@
 package com.example.notification_service.consumer;
 
-import com.example.notification_service.dto.UserRegisteredEvent;
-import com.example.notification_service.dto.VerificationEmailEvent;
+import com.example.notification_service.dto.event.*;
 import com.example.notification_service.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-//@Component
-//@RequiredArgsConstructor
-//public class NotificationConsumer {
-//
-//    private final EmailService emailService;
-//
-//    @RabbitListener(queues = "notification.email.queue")
-//    public void handle(
-//            UserRegisteredEvent event
-//    ) {
-//
-//        emailService.send(
-//                event.email(),
-//                "Welcome to ResearchHub",
-//                buildWelcomeTemplate(event)
-//        );
-//    }
-//
-//    @RabbitListener(
-//            queues = "notification.email.queue"
-//    )
-//    public void handle(
-//            VerificationEmailEvent event) {
-//
-//        emailService.send(
-//                event.email(),
-//                "Verify Your Email",
-//                buildVerificationTemplate(event)
-//        );
-//    }
-//}
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class NotificationConsumer {
+
+    private final EmailService emailService;
+
+    @RabbitListener(queues = "user.registered.queue")
+    public void consumeUserRegistered(
+            UserRegisteredEvent event
+    ) {
+        emailService.sendWelcomeEmail(event);
+    }
+
+    @RabbitListener(queues = "verification.requested.queue")
+    public void consumeVerificationRequested(
+            VerificationEmailRequestedEvent event
+    ) {
+        emailService.sendVerificationEmail(event);
+    }
+
+    @RabbitListener(queues = "user.verified.queue")
+    public void consumeUserVerified(
+            UserVerifiedEvent event
+    ) {
+        emailService.sendVerifiedEmail(event);
+    }
+
+    @RabbitListener(queues = "user.deleted.queue")
+    public void consumeUserDeleted(
+            UserDeletedEvent event
+    ) {
+        emailService.sendGoodbyeEmail(event);
+    }
+
+    @RabbitListener(queues = "password.reset.queue")
+    public void consumePasswordReset(
+            PasswordResetRequestedEvent event
+    ) {
+        emailService.sendPasswordResetEmail(event);
+    }
+}
