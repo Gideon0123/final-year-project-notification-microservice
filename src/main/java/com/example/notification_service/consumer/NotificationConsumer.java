@@ -18,6 +18,7 @@ public class NotificationConsumer {
     public void consumeUserRegistered(
             UserRegisteredEvent event
     ) {
+        log.info("Received UserRegisteredEvent {}", event.email());
         emailService.sendWelcomeEmail(event);
     }
 

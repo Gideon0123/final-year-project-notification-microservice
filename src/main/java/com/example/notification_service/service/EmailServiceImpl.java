@@ -22,6 +22,10 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendWelcomeEmail(UserRegisteredEvent event) {
 
+        String verificationLink = gatewayUrl +
+                "/auth/verify-email?token=" +
+                event.verificationToken();
+
     }
     @Recover
     public void recoverWelcomeEmail(
@@ -66,6 +70,10 @@ public class EmailServiceImpl implements EmailService {
     )
     @Override
     public void sendPasswordResetEmail(PasswordResetRequestedEvent event) {
+
+        String resetLink = frontendUrl +
+                "/reset-password?token=" +
+                event.token();
 
     }
     @Recover
