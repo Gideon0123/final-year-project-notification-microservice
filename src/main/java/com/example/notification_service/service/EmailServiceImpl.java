@@ -1,13 +1,20 @@
 package com.example.notification_service.service;
 
 import com.example.notification_service.dto.event.*;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.nio.charset.StandardCharsets;
 
 @Service
 @RequiredArgsConstructor
@@ -15,17 +22,51 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
+    private final TemplateEngine templateEngine;
 
-    @Retryable(
-            retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 3000)
-    )
+    @Value("${spring.mail.username}")
+    private String senderEmail;
+
+    @Value("${app.gateway-url}")
+    private String gatewayUrl;
+
     @Override
-    public void sendWelcomeEmail(UserRegisteredEvent event) {
+    @Retryable(
+            retryFor = Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(
+                    delay = 3000
+            )
+    )
+    public void sendWelcomeEmail(
+            UserRegisteredEvent event
+    ) {
 
-        String verificationLink = gatewayUrl +
-                "/auth/verify-email?token=" +
-                event.verificationToken();
+        Context context = new Context();
 
+        context.setVariable(
+                "name",
+                event.firstName()
+        );
+
+        context.setVariable(
+                "verificationLink",
+                gatewayUrl +
+                        "/auth/verify-email?token=" +
+                        event.verificationToken()
+        );
+
+        String html =
+                templateEngine.process(
+                        "verification-email",
+                        context
+                );
+
+        sendHtmlEmail(
+                event.email(),
+                "Verify Your Account",
+                html
+        );
     }
     @Recover
     public void recoverWelcomeEmail(
@@ -35,11 +76,16 @@ public class EmailServiceImpl implements EmailService {
         log.error("Email failed permanently {}", event.email(), ex);
     }
 
-    @Retryable(
-            retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 3000)
-    )
     @Override
-    public void sendVerificationEmail(VerificationEmailRequestedEvent event) {
+    @Retryable(
+            retryFor = Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 3000)
+    )
+    public void sendVerificationEmail(
+            VerificationEmailRequestedEvent event
+    ) {
+
 
     }
     @Recover
@@ -56,6 +102,25 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendVerifiedEmail(UserVerifiedEvent event) {
 
+        Context context = new Context();
+
+        context.setVariable(
+                "name",
+                event.firstName()
+        );
+
+        String html =
+                templateEngine.process(
+                        "welcome-email",
+                        context
+                );
+
+        sendHtmlEmail(
+                event.email(),
+                "Welcome To ResearchHub",
+                html
+        );
+
     }
     @Recover
     public void recoverVerifiedEmail(
@@ -65,16 +130,36 @@ public class EmailServiceImpl implements EmailService {
         log.error("Email failed permanently {}", event.email(), ex);
     }
 
-    @Retryable(
-            retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 3000)
-    )
     @Override
-    public void sendPasswordResetEmail(PasswordResetRequestedEvent event) {
+    @Retryable(
+            retryFor = Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(
+                    delay = 3000
+            )
+    )
+    public void sendPasswordResetEmail(
+            PasswordResetRequestedEvent event
+    ) {
 
-        String resetLink = frontendUrl +
-                "/reset-password?token=" +
-                event.token();
+        Context context = new Context();
 
+        context.setVariable(
+                "token",
+                event.token()
+        );
+
+        String html =
+                templateEngine.process(
+                        "password-reset-email",
+                        context
+                );
+
+        sendHtmlEmail(
+                event.email(),
+                "Password Reset Request",
+                html
+        );
     }
     @Recover
     public void recoverPasswordResetEmail(
@@ -97,5 +182,45 @@ public class EmailServiceImpl implements EmailService {
             UserDeletedEvent event
     ) {
         log.error("Email failed permanently {}", event.email(), ex);
+    }
+
+    private void sendHtmlEmail(
+            String to,
+            String subject,
+            String html
+    ) {
+
+        try {
+
+            MimeMessage mimeMessage =
+                    mailSender.createMimeMessage();
+
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(
+                            mimeMessage,
+                            true,
+                            StandardCharsets.UTF_8.name()
+                    );
+
+            helper.setFrom(senderEmail);
+
+            helper.setTo(to);
+
+            helper.setSubject(subject);
+
+            helper.setText(
+                    html,
+                    true
+            );
+
+            mailSender.send(mimeMessage);
+
+        } catch (Exception ex) {
+
+            throw new RuntimeException(
+                    "Failed to send email",
+                    ex
+            );
+        }
     }
 }
