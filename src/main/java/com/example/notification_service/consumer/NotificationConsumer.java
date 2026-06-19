@@ -2,6 +2,7 @@ package com.example.notification_service.consumer;
 
 import com.example.notification_service.dto.event.*;
 import com.example.notification_service.service.EmailService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -25,7 +26,7 @@ public class NotificationConsumer {
     @RabbitListener(queues = "verification.requested.queue")
     public void consumeVerificationRequested(
             VerificationEmailRequestedEvent event
-    ) {
+    ) throws MessagingException {
         emailService.sendVerificationEmail(event);
     }
 
@@ -39,7 +40,7 @@ public class NotificationConsumer {
     @RabbitListener(queues = "user.deleted.queue")
     public void consumeUserDeleted(
             UserDeletedEvent event
-    ) {
+    ) throws MessagingException {
         emailService.sendGoodbyeEmail(event);
     }
 
