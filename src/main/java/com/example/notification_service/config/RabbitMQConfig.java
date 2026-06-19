@@ -3,6 +3,7 @@ package com.example.notification_service.config;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.config.StatelessRetryOperationsInterceptor;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -235,11 +236,10 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public RetryOperationsInterceptor retryInterceptor() {
+    public StatelessRetryOperationsInterceptor retryInterceptor() {
 
         return RetryInterceptorBuilder
                 .stateless()
-                .maxAttempts(3)
                 .backOffOptions(
                         1000,
                         2.0,

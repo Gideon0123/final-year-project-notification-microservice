@@ -1,7 +1,6 @@
 package com.example.notification_service.service;
 
 import com.example.notification_service.dto.event.*;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +30,15 @@ public class EmailServiceImpl implements EmailService {
     @Value("${app.gateway-url}")
     private String gatewayUrl;
 
+    // =====================================================
+    // USER REGISTERED
+    // =====================================================
 
- // WELCOME EMAIL
     @Override
     @Retryable(
-            retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 3000)
+            retryFor = Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 3000)
     )
     public void sendWelcomeEmail(
             UserRegisteredEvent event
@@ -43,15 +46,21 @@ public class EmailServiceImpl implements EmailService {
 
         Context context = new Context();
 
-        context.setVariable("name", event.firstName());
+        context.setVariable(
+                "name",
+                event.firstName()
+        );
 
         context.setVariable(
                 "verificationLink",
-                gatewayUrl + "/auth/verify-email?token=" + event.verificationToken()
+                gatewayUrl +
+                        "/auth/verify-email?token=" +
+                        event.verificationToken()
         );
 
         String html = templateEngine.process(
-                "verification-email", context
+                "verification-email",
+                context
         );
 
         sendHtmlEmail(
@@ -59,83 +68,108 @@ public class EmailServiceImpl implements EmailService {
                 "Verify Your Account",
                 html
         );
+
+        log.info(
+                "Verification email sent to {}",
+                event.email()
+        );
     }
+
     @Recover
     public void recoverWelcomeEmail(
             Exception ex,
             UserRegisteredEvent event
     ) {
-        log.error("Email failed permanently {}", event.email(), ex);
+
+        log.error(
+                "Verification email permanently failed for {}",
+                event.email(),
+                ex
+        );
     }
 
-    //SEND VERIFICATION
+    // =====================================================
+    // RESEND VERIFICATION EMAIL
+    // =====================================================
+
     @Override
     @Retryable(
-            retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 3000)
+            retryFor = Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 3000)
     )
     public void sendVerificationEmail(
             VerificationEmailRequestedEvent event
-    ) throws MessagingException {
-        try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
+    ) {
 
-            MimeMessageHelper helper = new MimeMessageHelper(
-                    mimeMessage,
-                    true,
-                    StandardCharsets.UTF_8.name()
-            );
+        Context context = new Context();
 
-            Context context = new Context();
+        context.setVariable(
+                "name",
+                event.firstName()
+        );
 
-            String verificationLink = gatewayUrl +
-                    "/auth/verify-email?token=" +
-                    event.verificationToken();
+        context.setVariable(
+                "verificationLink",
+                gatewayUrl +
+                        "/auth/verify-email?token=" +
+                        event.verificationToken()
+        );
 
-            context.setVariable("firstName", event.firstName());
+        String html = templateEngine.process(
+                "verification-email",
+                context
+        );
 
-            context.setVariable("verificationLink", verificationLink);
+        sendHtmlEmail(
+                event.email(),
+                "Verify Your ResearchHub Account",
+                html
+        );
 
-            String html = templateEngine.process(
-                    "verification-email",
-                    context
-            );
-
-            helper.setTo(event.email());
-            helper.setSubject("Verify Your ResearchHub Account");
-
-            helper.setText(html, true);
-
-            mailSender.send(mimeMessage);
-
-            log.info("Verification email sent to {}", event.email());
-
-        } catch (Exception ex) {
-
-            log.error("Failed verification email to {}", event.email(), ex);
-
-            throw ex;
-        }
+        log.info(
+                "Verification email resent to {}",
+                event.email()
+        );
     }
+
     @Recover
     public void recoverVerificationEmail(
             Exception ex,
             VerificationEmailRequestedEvent event
     ) {
-        log.error("Email failed permanently {}", event.email(), ex);
+
+        log.error(
+                "Verification resend permanently failed for {}",
+                event.email(),
+                ex
+        );
     }
 
-    @Retryable(
-            retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 3000)
-    )
+    // =====================================================
+    // USER VERIFIED
+    // =====================================================
+
     @Override
-    public void sendVerifiedEmail(UserVerifiedEvent event) {
+    @Retryable(
+            retryFor = Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 3000)
+    )
+    public void sendVerifiedEmail(
+            UserVerifiedEvent event
+    ) {
 
         Context context = new Context();
 
-        context.setVariable("name", event.firstName());
+        context.setVariable(
+                "name",
+                event.firstName()
+        );
 
         String html = templateEngine.process(
-                "welcome-email", context
+                "welcome-email",
+                context
         );
 
         sendHtmlEmail(
@@ -144,25 +178,55 @@ public class EmailServiceImpl implements EmailService {
                 html
         );
 
+        log.info(
+                "Welcome email sent to {}",
+                event.email()
+        );
     }
+
     @Recover
     public void recoverVerifiedEmail(
             Exception ex,
             UserVerifiedEvent event
     ) {
-        log.error("Email failed permanently {}", event.email(), ex);
+
+        log.error(
+                "Welcome email permanently failed for {}",
+                event.email(),
+                ex
+        );
     }
+
+    // =====================================================
+    // PASSWORD RESET
+    // =====================================================
 
     @Override
     @Retryable(
-            retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 3000)
+            retryFor = Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 3000)
     )
     public void sendPasswordResetEmail(
             PasswordResetRequestedEvent event
     ) {
+
         Context context = new Context();
 
-        context.setVariable("token", event.token());
+        context.setVariable(
+                "firstName",
+                event.firstName()
+        );
+
+        context.setVariable(
+                "token",
+                event.token()
+        );
+
+        context.setVariable(
+                "expiry",
+                "1 Hour"
+        );
 
         String html = templateEngine.process(
                 "password-reset-email",
@@ -174,88 +238,98 @@ public class EmailServiceImpl implements EmailService {
                 "Password Reset Request",
                 html
         );
+
+        log.info(
+                "Password reset email sent to {}",
+                event.email()
+        );
     }
+
     @Recover
     public void recoverPasswordResetEmail(
             Exception ex,
             PasswordResetRequestedEvent event
     ) {
-        log.error("Email failed permanently {}", event.email(), ex);
+
+        log.error(
+                "Password reset email permanently failed for {}",
+                event.email(),
+                ex
+        );
     }
+
+    // =====================================================
+    // USER DELETED
+    // =====================================================
 
     @Override
     @Retryable(
-            retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 3000)
+            retryFor = Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 3000)
     )
     public void sendGoodbyeEmail(
             UserDeletedEvent event
-    ) throws MessagingException {
+    ) {
 
-        try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
+        Context context = new Context();
 
-            MimeMessageHelper helper = new MimeMessageHelper(
-                    mimeMessage,
-                    true,
-                    StandardCharsets.UTF_8.name()
-            );
+        context.setVariable(
+                "firstName",
+                event.firstName()
+        );
 
-            Context context = new Context();
+        String html = templateEngine.process(
+                "goodbye-email",
+                context
+        );
 
-            context.setVariable(
-                    "firstName",
-                    event.firstName()
-            );
+        sendHtmlEmail(
+                event.email(),
+                "Sorry To See You Go",
+                html
+        );
 
-            String html = templateEngine.process(
-                    "goodbye-email", context
-            );
-
-            helper.setTo(event.email());
-
-            helper.setSubject("Sorry To See You Go");
-
-            helper.setText(html, true);
-
-            mailSender.send(mimeMessage);
-
-            log.info(
-                    "Goodbye email sent to {}",
-                    event.email()
-            );
-
-        } catch (Exception ex) {
-
-            log.error(
-                    "Failed goodbye email {}",
-                    event.email(),
-                    ex
-            );
-
-            throw ex;
-        }
+        log.info(
+                "Goodbye email sent to {}",
+                event.email()
+        );
     }
+
     @Recover
     public void recoverGoodbyeEmail(
             Exception ex,
             UserDeletedEvent event
     ) {
-        log.error("Email failed permanently {}", event.email(), ex);
+
+        log.error(
+                "Goodbye email permanently failed for {}",
+                event.email(),
+                ex
+        );
     }
+
+    // =====================================================
+    // SHARED EMAIL METHOD
+    // =====================================================
 
     private void sendHtmlEmail(
             String to,
             String subject,
             String html
     ) {
-        try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
 
-            MimeMessageHelper helper = new MimeMessageHelper(
-                    mimeMessage,
-                    true,
-                    StandardCharsets.UTF_8.name()
-            );
+        try {
+
+            MimeMessage mimeMessage =
+                    mailSender.createMimeMessage();
+
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(
+                            mimeMessage,
+                            true,
+                            StandardCharsets.UTF_8.name()
+                    );
 
             helper.setFrom(senderEmail);
 
@@ -263,12 +337,27 @@ public class EmailServiceImpl implements EmailService {
 
             helper.setSubject(subject);
 
-            helper.setText(html, true);
+            helper.setText(
+                    html,
+                    true
+            );
 
-            mailSender.send(mimeMessage);
+            mailSender.send(
+                    mimeMessage
+            );
 
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to send email", ex);
+
+            log.error(
+                    "Failed sending email to {}",
+                    to,
+                    ex
+            );
+
+            throw new RuntimeException(
+                    "Failed to send email",
+                    ex
+            );
         }
     }
 }
