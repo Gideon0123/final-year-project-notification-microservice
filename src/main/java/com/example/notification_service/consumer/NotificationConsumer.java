@@ -27,6 +27,7 @@ public class NotificationConsumer {
     public void consumeVerificationRequested(
             VerificationEmailRequestedEvent event
     ) throws MessagingException {
+        log.info("Received VerificationEmailRequestedEvent {}", event.email());
         emailService.sendVerificationEmail(event);
     }
 
@@ -34,6 +35,7 @@ public class NotificationConsumer {
     public void consumeUserVerified(
             UserVerifiedEvent event
     ) {
+        log.info("Received UserVerifiedEvent {}", event.email());
         emailService.sendVerifiedEmail(event);
     }
 
@@ -41,6 +43,7 @@ public class NotificationConsumer {
     public void consumeUserDeleted(
             UserDeletedEvent event
     ) throws MessagingException {
+        log.info("Received UserDeletedEvent {}", event.email());
         emailService.sendGoodbyeEmail(event);
     }
 
@@ -48,6 +51,7 @@ public class NotificationConsumer {
     public void consumePasswordReset(
             PasswordResetRequestedEvent event
     ) {
+        log.info("Received PasswordResetRequestedEvent {}", event.email());
         emailService.sendPasswordResetEmail(event);
     }
 }

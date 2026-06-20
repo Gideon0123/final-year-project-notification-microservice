@@ -1,23 +1,21 @@
 package com.example.notification_service.config;
 
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
-import org.springframework.amqp.rabbit.config.StatelessRetryOperationsInterceptor;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 @Configuration
 public class RabbitMQConfig {
 
+    public static final String EXCHANGE = "researchhub.exchange";
+
     @Bean
     public TopicExchange notificationExchange() {
-        return new TopicExchange("notification.exchange");
+        return new TopicExchange(EXCHANGE);
     }
 
     @Bean
@@ -25,7 +23,7 @@ public class RabbitMQConfig {
         return QueueBuilder.durable("user.registered.queue")
                 .withArgument(
                         "x-dead-letter-exchange",
-                        "notification.exchange"
+                        EXCHANGE
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -68,7 +66,7 @@ public class RabbitMQConfig {
         return QueueBuilder.durable("user.verified.queue")
                 .withArgument(
                         "x-dead-letter-exchange",
-                        "notification.exchange"
+                        EXCHANGE
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -111,7 +109,7 @@ public class RabbitMQConfig {
         return QueueBuilder.durable("verification.requested.queue")
                 .withArgument(
                         "x-dead-letter-exchange",
-                        "notification.exchange"
+                        EXCHANGE
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -154,7 +152,7 @@ public class RabbitMQConfig {
         return QueueBuilder.durable("user.deleted.queue")
                 .withArgument(
                         "x-dead-letter-exchange",
-                        "notification.exchange"
+                        EXCHANGE
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -197,7 +195,7 @@ public class RabbitMQConfig {
         return QueueBuilder.durable("password.reset.queue")
                 .withArgument(
                         "x-dead-letter-exchange",
-                        "notification.exchange"
+                        EXCHANGE
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -235,21 +233,21 @@ public class RabbitMQConfig {
                 .with("password.reset.dlq");
     }
 
-    @Bean
-    public StatelessRetryOperationsInterceptor retryInterceptor() {
-
-        return RetryInterceptorBuilder
-                .stateless()
-                .backOffOptions(
-                        1000,
-                        2.0,
-                        10000
-                )
-                .recoverer(
-                        new RejectAndDontRequeueRecoverer()
-                )
-                .build();
-    }
+//    @Bean
+//    public RetryOperationsInterceptor retryInterceptor() {
+//
+//        return RetryInterceptorBuilder
+//                .stateless()
+//                .backOffOptions(
+//                        1000,
+//                        2.0,
+//                        10000
+//                )
+//                .recoverer(
+//                        new RejectAndDontRequeueRecoverer()
+//                )
+//                .build();
+//    }
 
     @Bean
     public MessageConverter messageConverter() {
@@ -259,8 +257,7 @@ public class RabbitMQConfig {
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory,
-            MessageConverter messageConverter,
-            RetryOperationsInterceptor retryInterceptor
+            MessageConverter messageConverter
     ) {
 
         SimpleRabbitListenerContainerFactory factory =
@@ -270,7 +267,7 @@ public class RabbitMQConfig {
 
         factory.setMessageConverter(messageConverter);
 
-        factory.setAdviceChain(retryInterceptor);
+        factory.setDefaultRequeueRejected(false);
 
         return factory;
     }
