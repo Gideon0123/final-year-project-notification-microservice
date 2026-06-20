@@ -2,6 +2,7 @@ package com.example.notification_service.consumer;
 
 import com.example.notification_service.dto.event.*;
 import com.example.notification_service.service.EmailService;
+import com.example.notification_service.utils.RabbitMQConstants;
 import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class NotificationConsumer {
 
     private final EmailService emailService;
 
-    @RabbitListener(queues = "user.registered.queue")
+    @RabbitListener(queues = RabbitMQConstants.USER_REGISTERED_QUEUE)
     public void consumeUserRegistered(
             UserRegisteredEvent event
     ) {
@@ -29,7 +30,7 @@ public class NotificationConsumer {
         emailService.sendWelcomeEmail(event);
     }
 
-    @RabbitListener(queues = "verification.requested.queue")
+    @RabbitListener(queues = RabbitMQConstants.VERIFICATION_REQUESTED_QUEUE)
     public void consumeVerificationRequested(
             VerificationEmailRequestedEvent event
     ) throws MessagingException {
@@ -37,7 +38,7 @@ public class NotificationConsumer {
         emailService.sendVerificationEmail(event);
     }
 
-    @RabbitListener(queues = "user.verified.queue")
+    @RabbitListener(queues = RabbitMQConstants.USER_VERIFIED_QUEUE)
     public void consumeUserVerified(
             UserVerifiedEvent event
     ) {
@@ -45,7 +46,7 @@ public class NotificationConsumer {
         emailService.sendVerifiedEmail(event);
     }
 
-    @RabbitListener(queues = "user.deleted.queue")
+    @RabbitListener(queues = RabbitMQConstants.USER_DELETED_QUEUE)
     public void consumeUserDeleted(
             UserDeletedEvent event
     ) throws MessagingException {
@@ -53,7 +54,7 @@ public class NotificationConsumer {
         emailService.sendGoodbyeEmail(event);
     }
 
-    @RabbitListener(queues = "password.reset.queue")
+    @RabbitListener(queues = RabbitMQConstants.PASSWORD_RESET_QUEUE)
     public void consumePasswordReset(
             PasswordResetRequestedEvent event
     ) {

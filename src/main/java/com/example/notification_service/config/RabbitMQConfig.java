@@ -1,5 +1,6 @@
 package com.example.notification_service.config;
 
+import com.example.notification_service.utils.RabbitMQConstants;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -11,19 +12,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String EXCHANGE = "researchhub.exchange";
+//    public static final String EXCHANGE = "notification.exchange";
+//    public static final String EXCHANGE = "researchhub.exchange";
 
     @Bean
     public TopicExchange notificationExchange() {
-        return new TopicExchange(EXCHANGE);
+        return new TopicExchange(RabbitMQConstants.EXCHANGE);
     }
 
     @Bean
     public Queue userRegisteredQueue() {
-        return QueueBuilder.durable("user.registered.queue")
+        return QueueBuilder.durable(RabbitMQConstants.USER_REGISTERED_QUEUE)
                 .withArgument(
                         "x-dead-letter-exchange",
-                        "researchhub.exchange"
+                        RabbitMQConstants.EXCHANGE
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -47,7 +49,7 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(userRegisteredQueue)
                 .to(notificationExchange)
-                .with("user.registered");
+                .with(RabbitMQConstants.USER_REGISTERED_ROUTING_KEY);
     }
 
     @Bean
@@ -63,10 +65,10 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue userVerifiedQueue() {
-        return QueueBuilder.durable("user.verified.queue")
+        return QueueBuilder.durable(RabbitMQConstants.USER_VERIFIED_QUEUE)
                 .withArgument(
                         "x-dead-letter-exchange",
-                        "researchhub.exchange"
+                        RabbitMQConstants.EXCHANGE
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -90,7 +92,7 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(userVerifiedQueue)
                 .to(notificationExchange)
-                .with("user.verified");
+                .with(RabbitMQConstants.USER_VERIFIED_ROUTING_KEY);
     }
 
     @Bean
@@ -106,10 +108,10 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue verificationRequestedQueue() {
-        return QueueBuilder.durable("verification.requested.queue")
+        return QueueBuilder.durable(RabbitMQConstants.VERIFICATION_REQUESTED_QUEUE)
                 .withArgument(
                         "x-dead-letter-exchange",
-                        "researchhub.exchange"
+                        RabbitMQConstants.EXCHANGE
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -133,7 +135,7 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(verificationRequestedQueue)
                 .to(notificationExchange)
-                .with("verification.requested");
+                .with(RabbitMQConstants.VERIFICATION_REQUESTED_ROUTING_KEY);
     }
 
     @Bean
@@ -149,10 +151,10 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue userDeletedQueue() {
-        return QueueBuilder.durable("user.deleted.queue")
+        return QueueBuilder.durable(RabbitMQConstants.USER_DELETED_QUEUE)
                 .withArgument(
                         "x-dead-letter-exchange",
-                        "researchhub.exchange"
+                        RabbitMQConstants.EXCHANGE
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -176,7 +178,7 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(userDeletedQueue)
                 .to(notificationExchange)
-                .with("user.deleted");
+                .with(RabbitMQConstants.USER_DELETED_ROUTING_KEY);
     }
 
     @Bean
@@ -192,10 +194,10 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue passwordResetQueue() {
-        return QueueBuilder.durable("password.reset.queue")
+        return QueueBuilder.durable(RabbitMQConstants.PASSWORD_RESET_QUEUE)
                 .withArgument(
                         "x-dead-letter-exchange",
-                        "researchhub.exchange"
+                        RabbitMQConstants.EXCHANGE
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -219,7 +221,7 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(passwordResetQueue)
                 .to(notificationExchange)
-                .with("password.reset");
+                .with(RabbitMQConstants.PASSWORD_RESET_ROUTING_KEY);
     }
 
     @Bean
