@@ -2,6 +2,7 @@ package com.example.notification_service.consumer;
 
 import com.example.notification_service.dto.event.*;
 import com.example.notification_service.service.EmailService;
+import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationConsumer {
+
+    @PostConstruct
+    public void init() {
+        log.info("NotificationConsumer Loaded");
+    }
 
     private final EmailService emailService;
 

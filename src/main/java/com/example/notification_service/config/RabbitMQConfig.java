@@ -23,7 +23,7 @@ public class RabbitMQConfig {
         return QueueBuilder.durable("user.registered.queue")
                 .withArgument(
                         "x-dead-letter-exchange",
-                        EXCHANGE
+                        "researchhub.exchange"
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -66,7 +66,7 @@ public class RabbitMQConfig {
         return QueueBuilder.durable("user.verified.queue")
                 .withArgument(
                         "x-dead-letter-exchange",
-                        EXCHANGE
+                        "researchhub.exchange"
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -109,7 +109,7 @@ public class RabbitMQConfig {
         return QueueBuilder.durable("verification.requested.queue")
                 .withArgument(
                         "x-dead-letter-exchange",
-                        EXCHANGE
+                        "researchhub.exchange"
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -152,7 +152,7 @@ public class RabbitMQConfig {
         return QueueBuilder.durable("user.deleted.queue")
                 .withArgument(
                         "x-dead-letter-exchange",
-                        EXCHANGE
+                        "researchhub.exchange"
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
@@ -195,7 +195,7 @@ public class RabbitMQConfig {
         return QueueBuilder.durable("password.reset.queue")
                 .withArgument(
                         "x-dead-letter-exchange",
-                        EXCHANGE
+                        "researchhub.exchange"
                 )
                 .withArgument(
                         "x-dead-letter-routing-key",
