@@ -59,7 +59,7 @@ public class EmailServiceImpl implements EmailService {
         );
 
         String html = templateEngine.process(
-                "verification-email",
+                "welcome-email",
                 context
         );
 
@@ -117,7 +117,7 @@ public class EmailServiceImpl implements EmailService {
         );
 
         String html = templateEngine.process(
-                "verification-email",
+                "verification-requested",
                 context
         );
 
@@ -168,7 +168,7 @@ public class EmailServiceImpl implements EmailService {
         );
 
         String html = templateEngine.process(
-                "welcome-email",
+                "verification-email",
                 context
         );
 
