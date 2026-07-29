@@ -12,6 +12,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
+    public static final String REVIEW_EXCHANGE = "review.exchange";
+    public static final String REVIEW_ASSIGNMENT_QUEUE = "review.assignment.queue";
+    public static final String REVIEW_ACCEPTED_QUEUE = "review.accepted.queue";
+    public static final String REVIEW_DECLINED_QUEUE = "review.declined.queue";
+    public static final String REVIEW_SUBMITTED_QUEUE = "review.submitted.queue";
+    public static final String REVIEW_DECISION_QUEUE = "review.decision.queue";
+    public static final String REVIEW_REMINDER_QUEUE = "review.reminder.queue";
+    public static final String REVIEW_REVISION_QUEUE = "review.revision.queue";
+
 //    public static final String EXCHANGE = "notification.exchange";
 //    public static final String EXCHANGE = "researchhub.exchange";
 
@@ -250,6 +259,182 @@ public class RabbitMQConfig {
 //                )
 //                .build();
 //    }
+
+    @Bean
+    public TopicExchange reviewExchange(){
+
+        return new TopicExchange(
+                REVIEW_EXCHANGE
+        );
+
+    }
+
+    @Bean
+    public Queue reviewerAssignedQueue(){
+
+        return QueueBuilder
+                .durable(REVIEW_ASSIGNMENT_QUEUE)
+                .build();
+
+    }
+
+    @Bean
+    public Queue reviewAcceptedQueue(){
+
+        return QueueBuilder
+                .durable(REVIEW_ACCEPTED_QUEUE)
+                .build();
+
+    }
+
+    @Bean
+    public Queue reviewDeclinedQueue(){
+
+        return QueueBuilder
+                .durable(REVIEW_DECLINED_QUEUE)
+                .build();
+
+    }
+
+    @Bean
+    public Queue reviewSubmittedQueue(){
+
+        return QueueBuilder
+                .durable(REVIEW_SUBMITTED_QUEUE)
+                .build();
+
+    }
+
+    @Bean
+    public Queue decisionQueue(){
+
+        return QueueBuilder
+                .durable(REVIEW_DECISION_QUEUE)
+                .build();
+
+    }
+
+    @Bean
+    public Queue reminderQueue(){
+
+        return QueueBuilder
+                .durable(REVIEW_REMINDER_QUEUE)
+                .build();
+
+    }
+
+    @Bean
+    public Queue revisionQueue(){
+
+        return QueueBuilder
+                .durable(REVIEW_REVISION_QUEUE)
+                .build();
+
+    }
+
+//
+
+    @Bean
+    public Binding reviewerAssignedBinding(
+            Queue reviewerAssignedQueue,
+            TopicExchange reviewExchange
+    ){
+        return BindingBuilder
+                .bind(reviewerAssignedQueue)
+                .to(reviewExchange)
+                .with(
+                        "review.assignment"
+                );
+
+    }
+
+    @Bean
+    public Binding acceptedBinding(
+            Queue reviewAcceptedQueue,
+            TopicExchange reviewExchange
+    ){
+        return BindingBuilder
+                .bind(reviewAcceptedQueue)
+                .to(reviewExchange)
+                .with(
+                        "review.accepted"
+                );
+
+    }
+
+    @Bean
+    public Binding declinedBinding(
+            Queue reviewDeclinedQueue,
+            TopicExchange reviewExchange
+    ){
+        return BindingBuilder
+                .bind(reviewDeclinedQueue)
+                .to(reviewExchange)
+                .with(
+                        "review.declined"
+                );
+
+    }
+
+    @Bean
+    public Binding submittedBinding(
+            Queue reviewSubmittedQueue,
+            TopicExchange reviewExchange
+    ){
+
+        return BindingBuilder
+                .bind(reviewSubmittedQueue)
+                .to(reviewExchange)
+                .with(
+                        "review.submitted"
+                );
+
+    }
+
+    @Bean
+    public Binding decisionBinding(
+            Queue decisionQueue,
+            TopicExchange reviewExchange
+    ){
+
+        return BindingBuilder
+                .bind(decisionQueue)
+                .to(reviewExchange)
+                .with(
+                        "review.decision"
+                );
+
+    }
+
+    @Bean
+    public Binding reminderBinding(
+            Queue reminderQueue,
+            TopicExchange reviewExchange
+    ){
+
+        return BindingBuilder
+                .bind(reminderQueue)
+                .to(reviewExchange)
+                .with(
+                        "review.reminder"
+                );
+
+    }
+
+    @Bean
+    public Binding revisionBinding(
+            Queue revisionQueue,
+            TopicExchange reviewExchange
+    ){
+
+        return BindingBuilder
+                .bind(revisionQueue)
+                .to(reviewExchange)
+                .with(
+                        "review.revision"
+                );
+
+    }
 
     @Bean
     public MessageConverter messageConverter() {
