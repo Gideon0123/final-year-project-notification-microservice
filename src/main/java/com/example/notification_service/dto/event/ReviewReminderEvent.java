@@ -1,0 +1,22 @@
+package com.example.notification_service.dto.event;
+
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ReviewReminderEvent {
+
+    private Long reviewId;
+
+    private Long reviewerId;
+
+    private Long paperId;
+
+    private LocalDateTime deadline;
+
+}
