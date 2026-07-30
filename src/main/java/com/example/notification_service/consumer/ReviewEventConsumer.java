@@ -71,9 +71,11 @@ public class ReviewEventConsumer {
     public void handleDeclined(
             ReviewDeclinedEvent event
     ){
-        notificationService.createNotification(
+        notificationService.notify(
 
                 event.getReviewerId(),
+
+                event.getReviewerEmail(),
 
                 "Review Declined",
 
@@ -109,9 +111,11 @@ public class ReviewEventConsumer {
 
         }
 
-        notificationService.createNotification(
+        notificationService.notify(
 
                 event.getAuthorId(),
+
+                event.getRecipientEmail(),
 
                 "Editorial Decision",
 
@@ -128,9 +132,11 @@ public class ReviewEventConsumer {
     public void handleSubmitted(
             ReviewSubmittedEvent event
     ){
-        notificationService.createNotification(
+        notificationService.notify(
 
                 event.getReviewerId(),
+
+                event.getReviewerEmail(),
 
                 "Review Submitted",
 
@@ -155,9 +161,11 @@ public class ReviewEventConsumer {
     public void handleRevision(
             RevisionRequestedEvent event
     ){
-        notificationService.createNotification(
+        notificationService.notify(
 
                 event.getAuthorId(),
+
+                event.getAuthorEmail(),
 
                 "Revision Requested",
 
@@ -182,7 +190,7 @@ public class ReviewEventConsumer {
 
                 event.getReviewerId(),
 
-//                event.getReviewerEmail(),
+                event.getReviewerEmail(),
 
                 "Revision Reminder",
 
