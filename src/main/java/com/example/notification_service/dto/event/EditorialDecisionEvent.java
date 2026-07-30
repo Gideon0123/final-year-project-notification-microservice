@@ -16,6 +16,8 @@ public class EditorialDecisionEvent {
 
     private Long reviewId;
 
+    private Long authorId;
+
     private Long editorId;
 
     private EditorialDecision decision;

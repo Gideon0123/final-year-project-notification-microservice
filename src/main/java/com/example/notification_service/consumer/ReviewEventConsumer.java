@@ -20,9 +20,11 @@ public class ReviewEventConsumer {
     public void handleReviewAssigned(
             ReviewAssignedEvent event
     ){
-        notificationService.createNotification(
+        notificationService.notify(
 
                 event.getReviewerId(),
+
+                event.getReviewerEmail(),
 
                 "New Review Assignment",
 
@@ -44,9 +46,11 @@ public class ReviewEventConsumer {
     public void handleAccepted(
             ReviewAcceptedEvent event
     ){
-        notificationService.createNotification(
+        notificationService.notify(
 
                 event.getReviewerId(),
+
+                event.getReviewerEmail(),
 
                 "Review Accepted",
 
@@ -107,7 +111,7 @@ public class ReviewEventConsumer {
 
         notificationService.createNotification(
 
-                event.getEditorId(),
+                event.getAuthorId(),
 
                 "Editorial Decision",
 
@@ -130,7 +134,7 @@ public class ReviewEventConsumer {
 
                 "Review Submitted",
 
-                "You accepted the review invitation." + "\n" +
+                "\"Your review has been successfully submitted." + "\n" +
                         "Details of the Review are as follows:" + "\n" +
                         "Review ID: " + event.getReviewId() + "\n" +
                         "Paper ID: " + event.getPaperId() + "\n" +
@@ -153,7 +157,7 @@ public class ReviewEventConsumer {
     ){
         notificationService.createNotification(
 
-                event.getPaperId(),
+                event.getAuthorId(),
 
                 "Revision Requested",
 
@@ -174,13 +178,15 @@ public class ReviewEventConsumer {
     public void handleReminder(
             ReviewReminderEvent event
     ){
-        notificationService.createNotification(
+        notificationService.notify(
 
                 event.getReviewerId(),
 
+//                event.getReviewerEmail(),
+
                 "Revision Reminder",
 
-                "This is a Reminder to follow up an assigned Review." + "\n" +
+                "This is a reminder that your assigned review is approaching its deadline." + "\n" +
                         "Details of the Review are as follows:" + "\n" +
                         "Review ID: " + event.getReviewId() + "\n" +
                         "Paper ID: " + event.getPaperId() + "\n" +

@@ -1,6 +1,7 @@
 package com.example.notification_service.service;
 
 import com.example.notification_service.dto.event.*;
+import com.example.notification_service.entity.Notification;
 import jakarta.mail.MessagingException;
 
 public interface EmailService {
@@ -10,4 +11,6 @@ public interface EmailService {
     void sendVerifiedEmail(UserVerifiedEvent event);
     void sendPasswordResetEmail(PasswordResetRequestedEvent event);
     void sendGoodbyeEmail(UserDeletedEvent event) throws MessagingException;
+
+    void send(Notification notification) throws MessagingException;
 }

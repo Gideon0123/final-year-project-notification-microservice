@@ -1,6 +1,8 @@
 package com.example.notification_service.service;
 
 import com.example.notification_service.dto.event.*;
+import com.example.notification_service.entity.Notification;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.nio.charset.StandardCharsets;
 
@@ -23,6 +26,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
+    private final SpringTemplateEngine springTemplateEngine;
 
     @Value("${spring.mail.username}")
     private String senderEmail;
@@ -294,6 +298,56 @@ public class EmailServiceImpl implements EmailService {
                 "Goodbye email sent to {}",
                 event.email()
         );
+    }
+
+    @Override
+    public void send(
+            Notification notification
+    ) throws MessagingException {
+        Context context = new Context();
+        context.setVariable(
+                "title",
+                notification.getTitle()
+        );
+
+        context.setVariable(
+                "message",
+                notification.getMessage()
+        );
+
+        context.setVariable(
+                "recipient",
+                notification.getRecipientEmail()
+        );
+
+        context.setVariable(
+                "type",
+                notification.getType()
+        );
+
+        String html = templateEngine.process(
+                "emails/notification",
+                context
+        );
+
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+        MimeMessageHelper helper = new MimeMessageHelper(
+                mimeMessage,
+                true,
+                StandardCharsets.UTF_8.name()
+        );
+
+        helper.setTo(notification.getRecipientEmail());
+        helper.setSubject(notification.getTitle());
+
+        helper.setText(
+                html,
+                true
+        );
+
+        mailSender.send(mimeMessage);
+
     }
 
     @Recover
