@@ -1,5 +1,7 @@
 package com.example.notification_service.utils;
 
+import static com.example.notification_service.config.RabbitMQConfig.REVIEW_EXCHANGE;
+
 public final class RabbitMQConstants {
 
     private RabbitMQConstants(){}
@@ -15,5 +17,14 @@ public final class RabbitMQConstants {
     public static final String VERIFICATION_REQUESTED_ROUTING_KEY = "verification.requested";
     public static final String USER_DELETED_ROUTING_KEY = "user.deleted";
     public static final String PASSWORD_RESET_ROUTING_KEY = "password.reset";
+
+    public static final String REVIEW_ESCALATION_QUEUE =
+            "review.escalation.queue";
+
+    public static final String REVIEW_ESCALATION_ROUTING_KEY =
+            "review.escalation";
+
+    public static final String REVIEW_ESCALATION_EXCHANGE =
+            REVIEW_EXCHANGE;
 
 }

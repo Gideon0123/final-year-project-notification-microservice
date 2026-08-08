@@ -2,12 +2,16 @@ package com.example.notification_service.config;
 
 import com.example.notification_service.utils.RabbitMQConstants;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.config.StatelessRetryOperationsInterceptor;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 @Configuration
 public class RabbitMQConfig {
@@ -20,6 +24,17 @@ public class RabbitMQConfig {
     public static final String REVIEW_DECISION_QUEUE = "review.decision.queue";
     public static final String REVIEW_REMINDER_QUEUE = "review.reminder.queue";
     public static final String REVIEW_REVISION_QUEUE = "review.revision.queue";
+    public static final String REVIEW_DLX = "review.deadletter.exchange";
+
+//    public static final String REVIEW_ESCALATION_QUEUE = "review.escalation.queue";
+//
+//    public static final String REVIEW_ESCALATION_ROUTING_KEY = "review.escalation";
+//
+//    public static final String REVIEW_ESCALATION_EXCHANGE = REVIEW_EXCHANGE;
+
+    public static final String REVIEW_DLQ = "review.deadletter.queue";
+
+    public static final String REVIEW_DL_ROUTING_KEY = "review.dead";
 
 //    public static final String EXCHANGE = "notification.exchange";
 //    public static final String EXCHANGE = "researchhub.exchange";
@@ -244,21 +259,23 @@ public class RabbitMQConfig {
                 .with("password.reset.dlq");
     }
 
-//    @Bean
-//    public RetryOperationsInterceptor retryInterceptor() {
-//
-//        return RetryInterceptorBuilder
-//                .stateless()
-//                .backOffOptions(
-//                        1000,
-//                        2.0,
-//                        10000
-//                )
-//                .recoverer(
-//                        new RejectAndDontRequeueRecoverer()
-//                )
-//                .build();
-//    }
+    @Bean
+    public StatelessRetryOperationsInterceptor retryInterceptor() {
+
+        return RetryInterceptorBuilder
+                .stateless()
+//                .maxAttempts(3)
+                .backOffOptions(
+                        2000,
+                        2.0,
+                        10000
+                )
+                .recoverer(
+                        new RejectAndDontRequeueRecoverer()
+                )
+                .build();
+
+    }
 
     @Bean
     public TopicExchange reviewExchange(){
@@ -274,6 +291,8 @@ public class RabbitMQConfig {
 
         return QueueBuilder
                 .durable(REVIEW_ASSIGNMENT_QUEUE)
+                .deadLetterExchange(REVIEW_DLX)
+                .deadLetterRoutingKey(REVIEW_DL_ROUTING_KEY)
                 .build();
 
     }
@@ -283,8 +302,9 @@ public class RabbitMQConfig {
 
         return QueueBuilder
                 .durable(REVIEW_ACCEPTED_QUEUE)
+                .deadLetterExchange(REVIEW_DLX)
+                .deadLetterRoutingKey(REVIEW_DL_ROUTING_KEY)
                 .build();
-
     }
 
     @Bean
@@ -292,8 +312,9 @@ public class RabbitMQConfig {
 
         return QueueBuilder
                 .durable(REVIEW_DECLINED_QUEUE)
+                .deadLetterExchange(REVIEW_DLX)
+                .deadLetterRoutingKey(REVIEW_DL_ROUTING_KEY)
                 .build();
-
     }
 
     @Bean
@@ -301,8 +322,9 @@ public class RabbitMQConfig {
 
         return QueueBuilder
                 .durable(REVIEW_SUBMITTED_QUEUE)
+                .deadLetterExchange(REVIEW_DLX)
+                .deadLetterRoutingKey(REVIEW_DL_ROUTING_KEY)
                 .build();
-
     }
 
     @Bean
@@ -310,8 +332,9 @@ public class RabbitMQConfig {
 
         return QueueBuilder
                 .durable(REVIEW_DECISION_QUEUE)
+                .deadLetterExchange(REVIEW_DLX)
+                .deadLetterRoutingKey(REVIEW_DL_ROUTING_KEY)
                 .build();
-
     }
 
     @Bean
@@ -319,8 +342,9 @@ public class RabbitMQConfig {
 
         return QueueBuilder
                 .durable(REVIEW_REMINDER_QUEUE)
+                .deadLetterExchange(REVIEW_DLX)
+                .deadLetterRoutingKey(REVIEW_DL_ROUTING_KEY)
                 .build();
-
     }
 
     @Bean
@@ -328,8 +352,9 @@ public class RabbitMQConfig {
 
         return QueueBuilder
                 .durable(REVIEW_REVISION_QUEUE)
+                .deadLetterExchange(REVIEW_DLX)
+                .deadLetterRoutingKey(REVIEW_DL_ROUTING_KEY)
                 .build();
-
     }
 
 //
@@ -422,6 +447,17 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Binding reviewEscalationBinding(
+            Queue reviewEscalationQueue,
+            TopicExchange reviewExchange
+    ) {
+        return BindingBuilder
+                .bind(reviewEscalationQueue)
+                .to(reviewExchange)
+                .with(RabbitMQConstants.REVIEW_ESCALATION_ROUTING_KEY);
+    }
+
+    @Bean
     public Binding revisionBinding(
             Queue revisionQueue,
             TopicExchange reviewExchange
@@ -433,7 +469,38 @@ public class RabbitMQConfig {
                 .with(
                         "review.revision"
                 );
+    }
 
+    @Bean
+    public Queue reviewEscalationQueue() {
+
+        return QueueBuilder
+                .durable(
+                        RabbitMQConstants.REVIEW_ESCALATION_QUEUE
+                )
+                .build();
+    }
+
+    @Bean
+    public TopicExchange reviewDeadLetterExchange() {return new TopicExchange(REVIEW_DLX);}
+
+    @Bean
+    public Queue reviewDeadLetterQueue() {
+
+        return QueueBuilder
+                .durable(REVIEW_DLQ)
+                .build();
+    }
+
+    @Bean
+    public Binding reviewDeadLetterBinding(
+            Queue reviewDeadLetterQueue,
+            TopicExchange reviewDeadLetterExchange
+    ) {
+        return BindingBuilder
+                .bind(reviewDeadLetterQueue)
+                .to(reviewDeadLetterExchange)
+                .with(REVIEW_DL_ROUTING_KEY);
     }
 
     @Bean
@@ -444,7 +511,8 @@ public class RabbitMQConfig {
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory,
-            MessageConverter messageConverter
+            MessageConverter messageConverter,
+            RetryOperationsInterceptor retryInterceptor
     ) {
 
         SimpleRabbitListenerContainerFactory factory =
@@ -454,8 +522,35 @@ public class RabbitMQConfig {
 
         factory.setMessageConverter(messageConverter);
 
+        factory.setAdviceChain(
+                retryInterceptor
+        );
+
         factory.setDefaultRequeueRejected(false);
 
         return factory;
+
     }
+
+//    @Bean
+//    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+//            ConnectionFactory connectionFactory,
+//            MessageConverter messageConverter
+//    ) {
+//
+//        SimpleRabbitListenerContainerFactory factory =
+//                new SimpleRabbitListenerContainerFactory();
+//
+//        factory.setConnectionFactory(connectionFactory);
+//
+//        factory.setMessageConverter(messageConverter);
+//
+//        factory.setAdviceChain(
+//                retryInterceptor()
+//        );
+//
+//        factory.setDefaultRequeueRejected(false);
+//
+//        return factory;
+//    }
 }

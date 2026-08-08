@@ -4,6 +4,7 @@ import com.example.notification_service.config.RabbitMQConfig;
 import com.example.notification_service.dto.event.*;
 import com.example.notification_service.enums.NotificationType;
 import com.example.notification_service.service.NotificationService;
+import com.example.notification_service.utils.RabbitMQConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -203,6 +204,39 @@ public class ReviewEventConsumer {
                 NotificationType.REVIEW_REMINDER
         );
 
+    }
+
+    @RabbitListener(
+            queues = RabbitMQConstants.REVIEW_ESCALATION_QUEUE
+    )
+    public void handleEscalation(
+            ReviewEscalationEvent event
+    ) {
+
+        notificationService.notify(
+
+                event.getReviewerId(),
+
+                event.getReviewerEmail(),
+
+                "Review Deadline Escalation",
+
+                "Your assigned review has passed its deadline."
+                        + "\n\n"
+                        + "Review ID: "
+                        + event.getReviewId()
+                        + "\n"
+                        + "Paper ID: "
+                        + event.getPaperId()
+                        + "\n"
+                        + "Deadline: "
+                        + event.getDeadline()
+                        + "\n"
+                        + "Escalated At: "
+                        + event.getEscalatedAt(),
+
+                NotificationType.REVIEW_ESCALATION
+        );
     }
 
 }
