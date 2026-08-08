@@ -16,6 +16,8 @@ public enum NotificationType {
 
     PAPER_REJECTED,
 
-    REVIEW_REMINDER
+    REVIEW_REMINDER,
+
+    REVIEW_ESCALATION
 
 }
