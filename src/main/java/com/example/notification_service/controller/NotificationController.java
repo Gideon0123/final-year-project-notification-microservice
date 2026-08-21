@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/notifications")
+@RequestMapping("/notification")
 public class NotificationController {
 
     private final NotificationQueryService notificationService;
