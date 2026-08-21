@@ -35,4 +35,9 @@ public interface NotificationQueryService {
     long unreadCount(
             Long userId
     );
+
+    void deleteNotification(
+            Long userId,
+            Long notificationId
+    );
 }

@@ -114,6 +114,7 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
         }
 
         notification.setRead(true);
+        repository.save(notification);
     }
 
     @Override
@@ -124,7 +125,10 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
                         userId,
                         Pageable.unpaged()
                 )
-                .forEach(notification -> notification.setRead(true));
+                .forEach(notification -> {
+                    notification.setRead(true);
+                    repository.save(notification);
+                });
     }
 
     @Override
@@ -135,5 +139,25 @@ public class NotificationQueryServiceImpl implements NotificationQueryService {
         return repository.countByRecipientIdAndReadFalse(
                 userId
         );
+    }
+
+    @Override
+    public void deleteNotification(
+            Long userId,
+            Long notificationId
+    ) {
+        Notification notification = repository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                                "Notification not found"
+                        )
+                );
+
+        if (!notification.getRecipientId().equals(userId)) {
+            throw new AccessDeniedException(
+                    "You do not own this notification"
+            );
+        }
+
+        repository.delete(notification);
     }
 }
