@@ -1,4 +1,4 @@
-package com.example.notification_service;
+package com.example.notification_service.mapper;
 
 import com.example.notification_service.dto.NotificationResponse;
 import com.example.notification_service.entity.Notification;
