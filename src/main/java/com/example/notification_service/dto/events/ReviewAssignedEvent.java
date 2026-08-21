@@ -1,4 +1,4 @@
-package com.example.notification_service.dto.event;
+package com.example.notification_service.dto.events;
 
 import lombok.*;
 
@@ -9,16 +9,20 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReviewReminderEvent {
+public class ReviewAssignedEvent {
 
     private Long reviewId;
+
+    private Long paperId;
 
     private Long reviewerId;
 
     private String reviewerEmail;
 
-    private Long paperId;
+    private Integer reviewRound;
 
     private LocalDateTime deadline;
+
+    private Integer revisionNumber;
 
 }

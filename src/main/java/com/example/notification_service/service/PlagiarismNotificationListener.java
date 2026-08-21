@@ -1,6 +1,6 @@
 package com.example.notification_service.service;
 
-import com.example.notification_service.dto.event.PlagiarismCheckCompletedEvent;
+import com.example.notification_service.dto.events.PlagiarismCheckCompletedEvent;
 import com.example.notification_service.utils.RabbitMQConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

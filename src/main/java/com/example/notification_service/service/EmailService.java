@@ -1,6 +1,6 @@
 package com.example.notification_service.service;
 
-import com.example.notification_service.dto.event.*;
+import com.example.notification_service.dto.events.*;
 import com.example.notification_service.entity.Notification;
 import jakarta.mail.MessagingException;
 

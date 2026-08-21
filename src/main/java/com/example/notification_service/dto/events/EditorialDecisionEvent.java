@@ -1,4 +1,4 @@
-package com.example.notification_service.dto.event;
+package com.example.notification_service.dto.events;
 
 import com.example.notification_service.enums.EditorialDecision;
 import lombok.*;

@@ -1,7 +1,8 @@
 package com.example.notification_service.service;
 
-import com.example.notification_service.dto.event.*;
+import com.example.notification_service.dto.events.*;
 import com.example.notification_service.entity.Notification;
+import com.example.notification_service.enums.NotificationStatus;
 import com.example.notification_service.repository.NotificationRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -272,7 +273,14 @@ public class EmailServiceImpl implements EmailService {
             Exception ex,
             Notification notification
     ) {
-        log.error("Goodbye email permanently failed for {}", notification.getRecipientEmail(), ex);
+        log.error(
+                "Plagiarism email permanently failed for {}",
+                notification.getRecipientEmail(),
+                ex
+        );
+
+        notification.setStatus(NotificationStatus.FAILED);
+        notification.setFailureReason(ex.getMessage());
     }
 
 

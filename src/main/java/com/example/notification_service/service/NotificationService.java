@@ -1,7 +1,6 @@
 package com.example.notification_service.service;
 
-import com.example.notification_service.dto.event.PlagiarismCheckCompletedEvent;
-import com.example.notification_service.entity.Notification;
+import com.example.notification_service.dto.events.PlagiarismCheckCompletedEvent;
 import com.example.notification_service.enums.NotificationType;
 
 public interface NotificationService {

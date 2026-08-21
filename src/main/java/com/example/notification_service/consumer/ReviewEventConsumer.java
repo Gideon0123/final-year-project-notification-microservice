@@ -1,7 +1,7 @@
 package com.example.notification_service.consumer;
 
 import com.example.notification_service.config.RabbitMQConfig;
-import com.example.notification_service.dto.event.*;
+import com.example.notification_service.dto.events.*;
 import com.example.notification_service.enums.NotificationType;
 import com.example.notification_service.service.NotificationService;
 import com.example.notification_service.utils.RabbitMQConstants;
