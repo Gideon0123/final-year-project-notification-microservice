@@ -17,6 +17,11 @@ public final class RabbitMQConstants {
     public static final String VERIFICATION_REQUESTED_ROUTING_KEY = "verification.requested";
     public static final String USER_DELETED_ROUTING_KEY = "user.deleted";
     public static final String PASSWORD_RESET_ROUTING_KEY = "password.reset";
+    public static final String PLAGIARISM_EXCHANGE = "plagiarism.exchange";
+    public static final String PLAGIARISM_ROUTING_KEY = "plagiarism.check.completed";
+    public static final String PLAGIARISM_QUEUE = "plagiarism.notification.queue";
+    public static final String PLAGIARISM_DLQ = "plagiarism.notification.dlq";
+    public static final String PLAGIARISM_DLQ_ROUTING_KEY = "plagiarism.check.failed";
 
     public static final String REVIEW_ESCALATION_QUEUE =
             "review.escalation.queue";

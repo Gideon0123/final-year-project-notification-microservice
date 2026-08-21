@@ -11,7 +11,9 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.retry.interceptor.RetryOperationsInterceptor;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class RabbitMQConfig {
@@ -22,44 +24,19 @@ public class RabbitMQConfig {
      * ============================================================
      */
 
-    public static final String REVIEW_EXCHANGE =
-            "review.exchange";
-
-    public static final String REVIEW_ASSIGNMENT_QUEUE =
-            "review.assignment.queue";
-
-    public static final String REVIEW_ACCEPTED_QUEUE =
-            "review.accepted.queue";
-
-    public static final String REVIEW_DECLINED_QUEUE =
-            "review.declined.queue";
-
-    public static final String REVIEW_SUBMITTED_QUEUE =
-            "review.submitted.queue";
-
-    public static final String REVIEW_DECISION_QUEUE =
-            "review.decision.queue";
-
-    public static final String REVIEW_REMINDER_QUEUE =
-            "review.reminder.queue";
-
-    public static final String REVIEW_REVISION_QUEUE =
-            "review.revision.queue";
-
-    public static final String REVIEW_ACCEPTED_PAPER_QUEUE =
-            "review.accepted.paper.queue";
-
-    public static final String REVIEW_ESCALATION_QUEUE =
-            "review.escalation.queue";
-
-    public static final String REVIEW_DLX =
-            "review.deadletter.exchange";
-
-    public static final String REVIEW_DLQ =
-            "review.deadletter.queue";
-
-    public static final String REVIEW_DL_ROUTING_KEY =
-            "review.dead";
+    public static final String REVIEW_EXCHANGE = "review.exchange";
+    public static final String REVIEW_ASSIGNMENT_QUEUE = "review.assignment.queue";
+    public static final String REVIEW_ACCEPTED_QUEUE = "review.accepted.queue";
+    public static final String REVIEW_DECLINED_QUEUE = "review.declined.queue";
+    public static final String REVIEW_SUBMITTED_QUEUE = "review.submitted.queue";
+    public static final String REVIEW_DECISION_QUEUE = "review.decision.queue";
+    public static final String REVIEW_REMINDER_QUEUE = "review.reminder.queue";
+    public static final String REVIEW_REVISION_QUEUE = "review.revision.queue";
+    public static final String REVIEW_ACCEPTED_PAPER_QUEUE = "review.accepted.paper.queue";
+    public static final String REVIEW_ESCALATION_QUEUE = "review.escalation.queue";
+    public static final String REVIEW_DLX = "review.deadletter.exchange";
+    public static final String REVIEW_DLQ = "review.deadletter.queue";
+    public static final String REVIEW_DL_ROUTING_KEY = "review.dead";
 
 
     /*
@@ -686,6 +663,73 @@ public class RabbitMQConfig {
                 .bind(reviewDeadLetterQueue)
                 .to(reviewDeadLetterExchange)
                 .with(REVIEW_DL_ROUTING_KEY);
+    }
+
+    /*
+     * ============================================================
+     * PLAGIARISM EXCHANGE
+     * ============================================================
+     */
+
+    @Bean
+    public TopicExchange plagiarismExchange() {
+
+        return new TopicExchange(
+                RabbitMQConstants.PLAGIARISM_EXCHANGE
+        );
+    }
+
+    @Bean
+    public TopicExchange plagiarismDeadLetterExchange() {
+
+        return new TopicExchange(
+                "plagiarism.dlx"
+        );
+    }
+
+    @Bean
+    public Queue plagiarismQueue() {
+        Map<String, Object> args = new HashMap<>();
+
+        args.put("x-dead-letter-exchange", "plagiarism.dlx");
+
+        args.put(
+                "x-dead-letter-routing-key",
+                RabbitMQConstants.PLAGIARISM_DLQ_ROUTING_KEY
+        );
+
+        return new Queue(
+                RabbitMQConstants.PLAGIARISM_QUEUE, true, false, false, args
+        );
+    }
+
+    @Bean
+    public Queue plagiarismDeadLetterQueue() {
+
+        return new Queue(
+                RabbitMQConstants.PLAGIARISM_DLQ,
+                true
+        );
+    }
+
+    @Bean
+    public Binding plagiarismBinding() {
+
+        return BindingBuilder
+                .bind(plagiarismQueue())
+                .to(plagiarismExchange())
+                .with(RabbitMQConstants.PLAGIARISM_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding plagiarismDeadLetterBinding() {
+
+        return BindingBuilder
+                .bind(plagiarismDeadLetterQueue())
+                .to(plagiarismDeadLetterExchange())
+                .with(
+                        RabbitMQConstants.PLAGIARISM_DLQ_ROUTING_KEY
+                );
     }
 
 

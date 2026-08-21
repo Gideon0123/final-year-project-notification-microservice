@@ -13,4 +13,6 @@ public interface EmailService {
     void sendGoodbyeEmail(UserDeletedEvent event) throws MessagingException;
 
     void send(Notification notification) throws MessagingException;
+
+    void sendPlagiarismResultEmail(Notification notification);
 }

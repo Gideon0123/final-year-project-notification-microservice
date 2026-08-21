@@ -1,5 +1,7 @@
 package com.example.notification_service.service;
 
+import com.example.notification_service.dto.event.PlagiarismCheckCompletedEvent;
+import com.example.notification_service.entity.Notification;
 import com.example.notification_service.enums.NotificationType;
 
 public interface NotificationService {
@@ -11,6 +13,10 @@ public interface NotificationService {
             String message,
             NotificationType type
 
+    );
+
+    void processPlagiarismNotification(
+            PlagiarismCheckCompletedEvent event
     );
 
 }

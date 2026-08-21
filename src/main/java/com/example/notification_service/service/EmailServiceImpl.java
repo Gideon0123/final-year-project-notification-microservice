@@ -2,6 +2,7 @@ package com.example.notification_service.service;
 
 import com.example.notification_service.dto.event.*;
 import com.example.notification_service.entity.Notification;
+import com.example.notification_service.repository.NotificationRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,8 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
     private final SpringTemplateEngine springTemplateEngine;
+    private final NotificationRepository notificationRepository;
+    private final EmailService emailService;
 
     @Value("${spring.mail.username}")
     private String senderEmail;
@@ -47,14 +50,8 @@ public class EmailServiceImpl implements EmailService {
     public void sendWelcomeEmail(
             UserRegisteredEvent event
     ) {
-
         Context context = new Context();
-
-        context.setVariable(
-                "name",
-                event.firstName()
-        );
-
+        context.setVariable("name", event.firstName());
         context.setVariable(
                 "verificationLink",
                 gatewayUrl +
@@ -62,21 +59,9 @@ public class EmailServiceImpl implements EmailService {
                         event.verificationToken()
         );
 
-        String html = templateEngine.process(
-                "welcome-email",
-                context
-        );
-
-        sendHtmlEmail(
-                event.email(),
-                "Verify Your Account",
-                html
-        );
-
-        log.info(
-                "Verification email sent to {}",
-                event.email()
-        );
+        String html = templateEngine.process("welcome-email", context);
+        sendHtmlEmail(event.email(), "Verify Your Account", html);
+        log.info("Verification email sent to {}", event.email());
     }
 
     @Recover
@@ -84,7 +69,6 @@ public class EmailServiceImpl implements EmailService {
             Exception ex,
             UserRegisteredEvent event
     ) {
-
         log.error(
                 "Verification email permanently failed for {}",
                 event.email(),
@@ -105,14 +89,11 @@ public class EmailServiceImpl implements EmailService {
     public void sendVerificationEmail(
             VerificationEmailRequestedEvent event
     ) {
-
         Context context = new Context();
-
         context.setVariable(
                 "name",
                 event.firstName()
         );
-
         context.setVariable(
                 "verificationLink",
                 gatewayUrl +
@@ -120,21 +101,11 @@ public class EmailServiceImpl implements EmailService {
                         event.verificationToken()
         );
 
-        String html = templateEngine.process(
-                "verification-requested",
-                context
-        );
-
+        String html = templateEngine.process("verification-requested", context);
         sendHtmlEmail(
-                event.email(),
-                "Verify Your ResearchHub Account",
-                html
+                event.email(), "Verify Your ResearchHub Account", html
         );
-
-        log.info(
-                "Verification email resent to {}",
-                event.email()
-        );
+        log.info("Verification email resent to {}", event.email());
     }
 
     @Recover
@@ -163,29 +134,11 @@ public class EmailServiceImpl implements EmailService {
     public void sendVerifiedEmail(
             UserVerifiedEvent event
     ) {
-
         Context context = new Context();
-
-        context.setVariable(
-                "name",
-                event.firstName()
-        );
-
-        String html = templateEngine.process(
-                "verification-email",
-                context
-        );
-
-        sendHtmlEmail(
-                event.email(),
-                "Welcome To ResearchHub",
-                html
-        );
-
-        log.info(
-                "Welcome email sent to {}",
-                event.email()
-        );
+        context.setVariable("name", event.firstName());
+        String html = templateEngine.process("verification-email", context);
+        sendHtmlEmail(event.email(), "Welcome To ResearchHub", html);
+        log.info("Welcome email sent to {}", event.email());
     }
 
     @Recover
@@ -193,7 +146,6 @@ public class EmailServiceImpl implements EmailService {
             Exception ex,
             UserVerifiedEvent event
     ) {
-
         log.error(
                 "Welcome email permanently failed for {}",
                 event.email(),
@@ -214,39 +166,13 @@ public class EmailServiceImpl implements EmailService {
     public void sendPasswordResetEmail(
             PasswordResetRequestedEvent event
     ) {
-
         Context context = new Context();
-
-        context.setVariable(
-                "firstName",
-                event.firstName()
-        );
-
-        context.setVariable(
-                "token",
-                event.token()
-        );
-
-        context.setVariable(
-                "expiry",
-                "1 Hour"
-        );
-
-        String html = templateEngine.process(
-                "password-reset-email",
-                context
-        );
-
-        sendHtmlEmail(
-                event.email(),
-                "Password Reset Request",
-                html
-        );
-
-        log.info(
-                "Password reset email sent to {}",
-                event.email()
-        );
+        context.setVariable("firstName", event.firstName());
+        context.setVariable("token", event.token());
+        context.setVariable("expiry", "1 Hour");
+        String html = templateEngine.process("password-reset-email", context);
+        sendHtmlEmail(event.email(), "Password Reset Request", html);
+        log.info("Password reset email sent to {}", event.email());
     }
 
     @Recover
@@ -254,7 +180,6 @@ public class EmailServiceImpl implements EmailService {
             Exception ex,
             PasswordResetRequestedEvent event
     ) {
-
         log.error(
                 "Password reset email permanently failed for {}",
                 event.email(),
@@ -275,29 +200,18 @@ public class EmailServiceImpl implements EmailService {
     public void sendGoodbyeEmail(
             UserDeletedEvent event
     ) {
-
         Context context = new Context();
-
-        context.setVariable(
-                "firstName",
-                event.firstName()
-        );
-
-        String html = templateEngine.process(
-                "goodbye-email",
-                context
-        );
-
-        sendHtmlEmail(
-                event.email(),
-                "Sorry To See You Go",
-                html
-        );
-
-        log.info(
-                "Goodbye email sent to {}",
-                event.email()
-        );
+        context.setVariable("firstName", event.firstName());
+        String html = templateEngine.process("goodbye-email", context);
+        sendHtmlEmail(event.email(), "Sorry To See You Go", html);
+        log.info("Goodbye email sent to {}", event.email());
+    }
+    @Recover
+    public void recoverGoodbyeEmail(
+            Exception ex,
+            UserDeletedEvent event
+    ) {
+        log.error("Goodbye email permanently failed for {}", event.email(), ex);
     }
 
     @Override
@@ -305,6 +219,32 @@ public class EmailServiceImpl implements EmailService {
             Notification notification
     ) throws MessagingException {
         Context context = new Context();
+        context.setVariable("title", notification.getTitle());
+        context.setVariable("message", notification.getMessage());
+        context.setVariable("recipient", notification.getRecipientEmail());
+        context.setVariable("type", notification.getType());
+        String html = templateEngine.process("emails/notification", context);
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(
+                mimeMessage, true, StandardCharsets.UTF_8.name()
+        );
+        helper.setTo(notification.getRecipientEmail());
+        helper.setSubject(notification.getTitle());
+        helper.setText(html, true);
+        mailSender.send(mimeMessage);
+    }
+
+    @Override
+    @Retryable(
+            retryFor = Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 3000)
+    )
+    public void sendPlagiarismResultEmail(
+            Notification notification
+    ) {
+        Context context = new Context();
+
         context.setVariable(
                 "title",
                 notification.getTitle()
@@ -315,103 +255,49 @@ public class EmailServiceImpl implements EmailService {
                 notification.getMessage()
         );
 
-        context.setVariable(
-                "recipient",
-                notification.getRecipientEmail()
+        String html =
+                templateEngine.process(
+                        "emails/plagiarism-result",
+                        context
+                );
+
+        sendHtmlEmail(
+                notification.getRecipientEmail(),
+                notification.getTitle(),
+                html
         );
-
-        context.setVariable(
-                "type",
-                notification.getType()
-        );
-
-        String html = templateEngine.process(
-                "emails/notification",
-                context
-        );
-
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-
-        MimeMessageHelper helper = new MimeMessageHelper(
-                mimeMessage,
-                true,
-                StandardCharsets.UTF_8.name()
-        );
-
-        helper.setTo(notification.getRecipientEmail());
-        helper.setSubject(notification.getTitle());
-
-        helper.setText(
-                html,
-                true
-        );
-
-        mailSender.send(mimeMessage);
-
     }
-
     @Recover
-    public void recoverGoodbyeEmail(
+    public void recoverPlagiarismEventEmail(
             Exception ex,
-            UserDeletedEvent event
+            Notification notification
     ) {
-
-        log.error(
-                "Goodbye email permanently failed for {}",
-                event.email(),
-                ex
-        );
+        log.error("Goodbye email permanently failed for {}", notification.getRecipientEmail(), ex);
     }
+
 
     // =====================================================
     // SHARED EMAIL METHOD
     // =====================================================
 
     private void sendHtmlEmail(
-            String to,
-            String subject,
-            String html
+            String to, String subject, String html
     ) {
-
         try {
-
-            MimeMessage mimeMessage =
-                    mailSender.createMimeMessage();
-
-            MimeMessageHelper helper =
-                    new MimeMessageHelper(
-                            mimeMessage,
-                            true,
-                            StandardCharsets.UTF_8.name()
-                    );
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    mimeMessage, true, StandardCharsets.UTF_8.name()
+            );
 
             helper.setFrom(senderEmail);
-
             helper.setTo(to);
-
             helper.setSubject(subject);
-
-            helper.setText(
-                    html,
-                    true
-            );
-
-            mailSender.send(
-                    mimeMessage
-            );
-
+            helper.setText(html, true);
+            mailSender.send(mimeMessage);
         } catch (Exception ex) {
-
-            log.error(
-                    "Failed sending email to {}",
-                    to,
-                    ex
-            );
-
-            throw new RuntimeException(
-                    "Failed to send email",
-                    ex
-            );
+            log.error("Failed sending email to {}", to, ex);
+            throw new RuntimeException("Failed to send email", ex);
         }
     }
+
 }

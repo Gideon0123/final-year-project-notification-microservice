@@ -1,5 +1,6 @@
 package com.example.notification_service.service;
 
+import com.example.notification_service.dto.event.PlagiarismCheckCompletedEvent;
 import com.example.notification_service.entity.Notification;
 import com.example.notification_service.enums.NotificationStatus;
 import com.example.notification_service.enums.NotificationType;
@@ -57,4 +58,53 @@ public class NotificationServiceImpl implements NotificationService {
 
     }
 
+    @Override
+    public void processPlagiarismNotification(PlagiarismCheckCompletedEvent event) {
+
+        Notification notification =
+                Notification.builder()
+                        .recipientId(event.authorId())
+                        .recipientEmail(event.authorEmail())
+                        .title("Plagiarism Check Completed")
+                        .message(buildMessage(event))
+                        .type(NotificationType.PLAGIARISM)
+                        .status(NotificationStatus.PENDING)
+                        .build();
+        notification = notificationRepository.save(notification);
+
+        try {
+//            emailService.send(notification);
+            emailService.sendPlagiarismResultEmail(notification);
+            notification.setStatus(NotificationStatus.SENT);
+            notification.setSentAt(LocalDateTime.now());
+
+        } catch (Exception ex) {
+
+            notification.setStatus(NotificationStatus.FAILED);
+            notification.setFailureReason(ex.getMessage());
+        }
+    }
+
+    private String buildMessage(
+            PlagiarismCheckCompletedEvent event
+    ) {
+        return """
+            Your plagiarism analysis has completed.
+
+            Paper ID: %d
+
+            Similarity: %.2f%%
+
+            Result: %s
+
+            Summary:
+            %s
+            """
+                .formatted(
+                        event.paperId(),
+                        event.similarityPercentage(),
+                        event.result(),
+                        event.summary()
+                );
+    }
 }

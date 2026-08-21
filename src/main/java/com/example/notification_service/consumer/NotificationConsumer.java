@@ -2,6 +2,7 @@ package com.example.notification_service.consumer;
 
 import com.example.notification_service.dto.event.*;
 import com.example.notification_service.service.EmailService;
+import com.example.notification_service.service.NotificationService;
 import com.example.notification_service.utils.RabbitMQConstants;
 import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationConsumer {
+
+    private final NotificationService notificationService;
 
     @PostConstruct
     public void init() {
@@ -60,5 +63,16 @@ public class NotificationConsumer {
     ) {
         log.info("Received PasswordResetRequestedEvent {}", event.email());
         emailService.sendPasswordResetEmail(event);
+    }
+
+    @RabbitListener(queues = RabbitMQConstants.PLAGIARISM_QUEUE)
+    public void consumePlagiarismCompleted(
+            PlagiarismCheckCompletedEvent event
+    ) {
+        log.info("Received plagiarism notification for paper={}",
+                event.paperId()
+        );
+        notificationService.processPlagiarismNotification(event);
+//        emailService.sendPlagiarismResultEmail(n);
     }
 }
