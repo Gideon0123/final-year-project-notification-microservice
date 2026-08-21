@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ public class NotificationController {
 
     private final NotificationQueryService notificationService;
 
+    @PreAuthorize("hasAnyRole('ADMIN','RESEARCHER','REVIEWER','STUDENT', 'LECTURER')")
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<PagedResponse<NotificationResponse>>> getMyNotifications(
             @RequestHeader("X-USER-ID") Long userId,
@@ -60,6 +62,7 @@ public class NotificationController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','RESEARCHER','REVIEWER','STUDENT', 'LECTURER')")
     @GetMapping("/unread")
     public ResponseEntity<ApiResponse<PagedResponse<NotificationResponse>>> getUnreadNotifications(
             @RequestHeader("X-USER-ID") Long userId,
@@ -100,6 +103,7 @@ public class NotificationController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','RESEARCHER','REVIEWER','STUDENT', 'LECTURER')")
     @GetMapping("/{notificationId}")
     public ResponseEntity<ApiResponse<NotificationResponse>> getNotification(
             @RequestHeader("X-USER-ID") Long userId,
@@ -125,6 +129,7 @@ public class NotificationController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','RESEARCHER','REVIEWER','STUDENT', 'LECTURER')")
     @PatchMapping("/{notificationId}/read")
     public ResponseEntity<ApiResponse<Void>> markAsRead(
             @RequestHeader("X-USER-ID") Long userId,
@@ -168,6 +173,7 @@ public class NotificationController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','RESEARCHER','REVIEWER','STUDENT', 'LECTURER')")
     @GetMapping("/unread-count")
     public ResponseEntity<ApiResponse<Long>> unreadCount(
             @RequestHeader("X-USER-ID") Long userId,
@@ -189,6 +195,7 @@ public class NotificationController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','RESEARCHER','REVIEWER','STUDENT', 'LECTURER')")
     @DeleteMapping("/{notificationId}")
     public ResponseEntity<ApiResponse<Void>> deleteNotification(
             @RequestHeader("X-USER-ID") Long userId,

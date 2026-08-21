@@ -83,6 +83,7 @@ public class NotificationServiceImpl implements NotificationService {
             notification.setStatus(NotificationStatus.FAILED);
             notification.setFailureReason(ex.getMessage());
         }
+        notificationRepository.save(notification);
     }
 
     private String buildMessage(

@@ -3,7 +3,6 @@ package com.example.notification_service.service;
 import com.example.notification_service.dto.events.*;
 import com.example.notification_service.entity.Notification;
 import com.example.notification_service.enums.NotificationStatus;
-import com.example.notification_service.repository.NotificationRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.nio.charset.StandardCharsets;
 
@@ -28,9 +26,6 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
-    private final SpringTemplateEngine springTemplateEngine;
-    private final NotificationRepository notificationRepository;
-    private final EmailService emailService;
 
     @Value("${spring.mail.username}")
     private String senderEmail;

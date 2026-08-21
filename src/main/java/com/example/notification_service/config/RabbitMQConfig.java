@@ -741,7 +741,6 @@ public class RabbitMQConfig {
 
     @Bean
     public MessageConverter messageConverter() {
-
         return new Jackson2JsonMessageConverter();
     }
 
@@ -789,13 +788,11 @@ public class RabbitMQConfig {
      */
 
     @Bean
-    public SimpleRabbitListenerContainerFactory
-    rabbitListenerContainerFactory(
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory,
             MessageConverter messageConverter,
             StatelessRetryOperationsInterceptor retryInterceptor
     ) {
-
         SimpleRabbitListenerContainerFactory factory =
                 new SimpleRabbitListenerContainerFactory();
 
