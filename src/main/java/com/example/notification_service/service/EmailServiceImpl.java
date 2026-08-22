@@ -237,25 +237,42 @@ public class EmailServiceImpl implements EmailService {
             backoff = @Backoff(delay = 3000)
     )
     public void sendPlagiarismResultEmail(
-            Notification notification
+            Notification notification,
+            PlagiarismCheckCompletedEvent event
     ) {
         Context context = new Context();
 
+        context.setVariable("paperId", event.paperId());
+
         context.setVariable(
-                "title",
-                notification.getTitle()
+                "authorEmail",
+                event.authorEmail()
         );
 
         context.setVariable(
-                "message",
-                notification.getMessage()
+                "similarityPercentage",
+                event.similarityPercentage()
         );
 
-        String html =
-                templateEngine.process(
-                        "emails/plagiarism-result",
-                        context
-                );
+        context.setVariable(
+                "result",
+                event.result()
+        );
+
+        context.setVariable(
+                "summary",
+                event.summary()
+        );
+
+        context.setVariable(
+                "completedAt",
+                event.completedAt()
+        );
+
+        String html = templateEngine.process(
+                "plagiarism-result",
+                context
+        );
 
         sendHtmlEmail(
                 notification.getRecipientEmail(),
@@ -266,7 +283,8 @@ public class EmailServiceImpl implements EmailService {
     @Recover
     public void recoverPlagiarismEventEmail(
             Exception ex,
-            Notification notification
+            Notification notification,
+            PlagiarismCheckCompletedEvent event
     ) {
         log.error(
                 "Plagiarism email permanently failed for {}",

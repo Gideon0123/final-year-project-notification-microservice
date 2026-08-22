@@ -1,6 +1,7 @@
 package com.example.notification_service.consumer;
 
 import com.example.notification_service.dto.events.*;
+import com.example.notification_service.entity.Notification;
 import com.example.notification_service.service.EmailService;
 import com.example.notification_service.service.NotificationService;
 import com.example.notification_service.utils.RabbitMQConstants;
@@ -73,6 +74,6 @@ public class NotificationConsumer {
                 event.paperId()
         );
         notificationService.processPlagiarismNotification(event);
-//        emailService.sendPlagiarismResultEmail(n);
+//        emailService.sendPlagiarismResultEmail(Notification notif);
     }
 }

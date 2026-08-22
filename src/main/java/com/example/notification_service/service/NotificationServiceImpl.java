@@ -74,7 +74,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         try {
 //            emailService.send(notification);
-            emailService.sendPlagiarismResultEmail(notification);
+            emailService.sendPlagiarismResultEmail(notification, event);
             notification.setStatus(NotificationStatus.SENT);
             notification.setSentAt(LocalDateTime.now());
 

@@ -1,7 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<body>
+
 <h2>Plagiarism Check Completed</h2>
+<h2>Here are the Details</h2>
 
 <p>Paper ID:
     <span th:text="${paperId}"></span>
+</p>
+
+<p>Author Email:
+    <span th:text="${authorEmail}"></span>
 </p>
 
 <p>Similarity:
@@ -12,5 +22,12 @@
     <span th:text="${result}"></span>
 </p>
 
-<p th:text="${summary}">
+<p th:text="${summary}"></p>
+
+<p>
+    This Check was completed at
+    <span th:text="${completedAt}"></span>
 </p>
+
+</body>
+</html>

@@ -14,5 +14,8 @@ public interface EmailService {
 
     void send(Notification notification) throws MessagingException;
 
-    void sendPlagiarismResultEmail(Notification notification);
+    void sendPlagiarismResultEmail(
+            Notification notification,
+            PlagiarismCheckCompletedEvent event
+    );
 }
