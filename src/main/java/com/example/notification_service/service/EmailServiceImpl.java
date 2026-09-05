@@ -3,6 +3,8 @@ package com.example.notification_service.service;
 import com.example.notification_service.dto.events.*;
 import com.example.notification_service.entity.Notification;
 import com.example.notification_service.enums.NotificationStatus;
+import com.example.notification_service.enums.NotificationType;
+import com.example.notification_service.repository.NotificationRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
+    private final NotificationRepository notificationRepository;
 
     @Value("${spring.mail.username}")
     private String senderEmail;
@@ -57,6 +61,18 @@ public class EmailServiceImpl implements EmailService {
 
         String html = templateEngine.process("welcome-email", context);
         sendHtmlEmail(event.email(), "Verify Your Account", html);
+
+        Notification notification = Notification.builder()
+                .recipientId(event.userId())
+                .recipientEmail(event.email())
+                .title("Welcome-Email")
+                .message(context.toString())
+                .type(NotificationType.SYSTEM)
+                .status(NotificationStatus.SENT)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        notificationRepository.save(notification);
         log.info("Verification email sent to {}", event.email());
     }
 
@@ -92,15 +108,23 @@ public class EmailServiceImpl implements EmailService {
         );
         context.setVariable(
                 "verificationLink",
-                gatewayUrl +
-                        "/auth/verify-email?token=" +
-                        event.verificationToken()
+                gatewayUrl + "/auth/verify-email?token=" + event.verificationToken()
         );
 
         String html = templateEngine.process("verification-requested", context);
-        sendHtmlEmail(
-                event.email(), "Verify Your ResearchHub Account", html
-        );
+        sendHtmlEmail(event.email(), "Verify Your ResearchHub Account", html);
+
+        Notification notification = Notification.builder()
+                .recipientId(event.userId())
+                .recipientEmail(event.email())
+                .title("Verification-Email")
+                .message(context.toString())
+                .type(NotificationType.SYSTEM)
+                .status(NotificationStatus.SENT)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        notificationRepository.save(notification);
         log.info("Verification email resent to {}", event.email());
     }
 
@@ -109,7 +133,6 @@ public class EmailServiceImpl implements EmailService {
             Exception ex,
             VerificationEmailRequestedEvent event
     ) {
-
         log.error(
                 "Verification resend permanently failed for {}",
                 event.email(),
@@ -134,6 +157,18 @@ public class EmailServiceImpl implements EmailService {
         context.setVariable("name", event.firstName());
         String html = templateEngine.process("verification-email", context);
         sendHtmlEmail(event.email(), "Welcome To ResearchHub", html);
+
+        Notification notification = Notification.builder()
+                .recipientId(event.userId())
+                .recipientEmail(event.email())
+                .title("Email-Verified")
+                .message(context.toString())
+                .type(NotificationType.SYSTEM)
+                .status(NotificationStatus.SENT)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        notificationRepository.save(notification);
         log.info("Welcome email sent to {}", event.email());
     }
 
@@ -168,6 +203,18 @@ public class EmailServiceImpl implements EmailService {
         context.setVariable("expiry", "1 Hour");
         String html = templateEngine.process("password-reset-email", context);
         sendHtmlEmail(event.email(), "Password Reset Request", html);
+
+        Notification notification = Notification.builder()
+                .recipientId(event.userId())
+                .recipientEmail(event.email())
+                .title("Password Reset Request")
+                .message(context.toString())
+                .type(NotificationType.SYSTEM)
+                .status(NotificationStatus.SENT)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        notificationRepository.save(notification);
         log.info("Password reset email sent to {}", event.email());
     }
 

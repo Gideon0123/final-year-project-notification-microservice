@@ -27,17 +27,16 @@ public class NotificationServiceImpl implements NotificationService {
             String message,
             NotificationType type
     ) {
-        Notification notification =
-                Notification.builder()
-                        .recipientId(recipientId)
-                        .recipientEmail(recipientEmail)
-                        .title(title)
-                        .message(message)
-                        .type(type)
-                        .status(NotificationStatus.PENDING)
-                        .read(false)
-                        .retryCount(0)
-                        .build();
+        Notification notification = Notification.builder()
+                .recipientId(recipientId)
+                .recipientEmail(recipientEmail)
+                .title(title)
+                .message(message)
+                .type(type)
+                .status(NotificationStatus.PENDING)
+                .read(false)
+                .retryCount(0)
+                .build();
 
         notificationRepository.save(notification);
 
@@ -61,15 +60,15 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void processPlagiarismNotification(PlagiarismCheckCompletedEvent event) {
 
-        Notification notification =
-                Notification.builder()
-                        .recipientId(event.authorId())
-                        .recipientEmail(event.authorEmail())
-                        .title("Plagiarism Check Completed")
-                        .message(buildMessage(event))
-                        .type(NotificationType.PLAGIARISM)
-                        .status(NotificationStatus.PENDING)
-                        .build();
+        Notification notification = Notification.builder()
+                .recipientId(event.authorId())
+                .recipientEmail(event.authorEmail())
+                .title("Plagiarism Check Completed")
+                .message(buildMessage(event))
+                .type(NotificationType.PLAGIARISM)
+                .status(NotificationStatus.PENDING)
+                .build();
+
         notification = notificationRepository.save(notification);
 
         try {
