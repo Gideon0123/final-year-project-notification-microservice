@@ -1,6 +1,7 @@
 package com.example.notification_service.repository;
 
 import com.example.notification_service.entity.IdempotencyRecord;
+import com.example.notification_service.utils.IdempotencyKeyUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;

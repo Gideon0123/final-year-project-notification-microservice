@@ -4,6 +4,7 @@ import com.example.notification_service.dto.ApiResponse;
 import com.example.notification_service.dto.NotificationResponse;
 import com.example.notification_service.payload.PagedResponse;
 import com.example.notification_service.service.NotificationQueryService;
+import com.example.notification_service.utils.Idempotent;
 import com.example.notification_service.utils.TraceIdUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -131,6 +132,7 @@ public class NotificationController {
 
     @PreAuthorize("hasAnyRole('ADMIN','RESEARCHER','REVIEWER','STUDENT', 'LECTURER')")
     @PatchMapping("/{notificationId}/read")
+    @Idempotent(ttlMinutes = 2)
     public ResponseEntity<ApiResponse<Void>> markAsRead(
             @RequestHeader("X-USER-ID") Long userId,
             @PathVariable Long notificationId,
@@ -153,6 +155,7 @@ public class NotificationController {
     }
 
     @PatchMapping("/read-all")
+    @Idempotent(ttlMinutes = 2)
     public ResponseEntity<ApiResponse<Void>> markAllAsRead(
             @RequestHeader("X-USER-ID") Long userId,
             HttpServletRequest request
@@ -197,6 +200,7 @@ public class NotificationController {
 
     @PreAuthorize("hasAnyRole('ADMIN','RESEARCHER','REVIEWER','STUDENT', 'LECTURER')")
     @DeleteMapping("/{notificationId}")
+    @Idempotent(ttlMinutes = 2)
     public ResponseEntity<ApiResponse<Void>> deleteNotification(
             @RequestHeader("X-USER-ID") Long userId,
             @PathVariable Long notificationId,
