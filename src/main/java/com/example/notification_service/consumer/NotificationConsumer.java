@@ -4,7 +4,6 @@ import com.example.notification_service.dto.events.*;
 import com.example.notification_service.service.EmailService;
 import com.example.notification_service.service.NotificationService;
 import com.example.notification_service.utils.RabbitMQConstants;
-import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,12 +16,6 @@ import org.springframework.stereotype.Component;
 public class NotificationConsumer {
 
     private final NotificationService notificationService;
-
-    @PostConstruct
-    public void init() {
-        log.info("NotificationConsumer Loaded");
-    }
-
     private final EmailService emailService;
 
     @RabbitListener(queues = RabbitMQConstants.USER_REGISTERED_QUEUE)

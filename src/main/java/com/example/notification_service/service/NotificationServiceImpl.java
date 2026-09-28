@@ -85,6 +85,45 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.save(notification);
     }
 
+    @Override
+    public void processReviewNotification(
+            Long recipientId,
+            String recipientEmail,
+            String title,
+            String message,
+            NotificationType type
+    ) {
+
+        Notification notification = Notification.builder()
+                .recipientId(recipientId)
+                .recipientEmail(recipientEmail)
+                .title(title)
+                .message(message)
+                .type(type)
+                .status(NotificationStatus.PENDING)
+                .read(false)
+                .retryCount(0)
+                .build();
+
+        notification = notificationRepository.save(notification);
+
+        try {
+            emailService.sendReviewNotificationEmail(notification);
+
+            notification.setStatus(NotificationStatus.SENT);
+            notification.setSentAt(LocalDateTime.now());
+            notification.setFailureReason(null);
+
+        } catch (Exception ex) {
+
+            notification.setStatus(NotificationStatus.FAILED);
+            notification.setFailureReason(ex.getMessage());
+
+        }
+
+        notificationRepository.save(notification);
+    }
+
     private String buildMessage(
             PlagiarismCheckCompletedEvent event
     ) {

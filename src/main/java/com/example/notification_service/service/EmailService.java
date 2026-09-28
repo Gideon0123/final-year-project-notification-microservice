@@ -18,4 +18,8 @@ public interface EmailService {
             Notification notification,
             PlagiarismCheckCompletedEvent event
     );
+
+    void sendReviewNotificationEmail(
+            Notification notification
+    );
 }

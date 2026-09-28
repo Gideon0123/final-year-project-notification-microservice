@@ -341,6 +341,68 @@ public class EmailServiceImpl implements EmailService {
 
         notification.setStatus(NotificationStatus.FAILED);
         notification.setFailureReason(ex.getMessage());
+        notificationRepository.save(notification);
+    }
+
+    @Override
+    @Retryable(
+            retryFor = Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 3000)
+    )
+    public void sendReviewNotificationEmail(
+            Notification notification
+    ) {
+
+        Context context = new Context();
+
+        context.setVariable(
+                "title",
+                notification.getTitle()
+        );
+
+        context.setVariable(
+                "message",
+                notification.getMessage()
+        );
+
+        context.setVariable(
+                "recipient",
+                notification.getRecipientEmail()
+        );
+
+        context.setVariable(
+                "type",
+                notification.getType()
+        );
+
+        String html = templateEngine.process(
+                "review-notification",
+                context
+        );
+
+        sendHtmlEmail(
+                notification.getRecipientEmail(),
+                notification.getTitle(),
+                html
+        );
+    }
+    @Recover
+    public void recoverReviewNotificationEmail(
+            Exception ex,
+            Notification notification
+    ) {
+
+        log.error(
+                "Review notification email permanently failed for {}",
+                notification.getRecipientEmail(),
+                ex
+        );
+
+        notification.setStatus(NotificationStatus.FAILED);
+        notification.setFailureReason(ex.getMessage());
+
+        notificationRepository.save(notification);
     }
 
 

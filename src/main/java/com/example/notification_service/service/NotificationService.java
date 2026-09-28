@@ -18,4 +18,11 @@ public interface NotificationService {
             PlagiarismCheckCompletedEvent event
     );
 
+    void processReviewNotification(
+            Long recipientId,
+            String recipientEmail,
+            String title,
+            String message,
+            NotificationType type
+    );
 }
