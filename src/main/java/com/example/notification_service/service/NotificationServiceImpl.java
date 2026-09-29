@@ -20,44 +20,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final EmailService emailService;
 
     @Override
-    public void notify(
-            Long recipientId,
-            String recipientEmail,
-            String title,
-            String message,
-            NotificationType type
-    ) {
-        Notification notification = Notification.builder()
-                .recipientId(recipientId)
-                .recipientEmail(recipientEmail)
-                .title(title)
-                .message(message)
-                .type(type)
-                .status(NotificationStatus.PENDING)
-                .read(false)
-                .retryCount(0)
-                .build();
-
-        notificationRepository.save(notification);
-
-        try{
-            emailService.send(notification);
-            notification.setStatus(NotificationStatus.SENT);
-            notification.setSentAt(LocalDateTime.now());
-            notification.setFailureReason(null);
-
-        }
-
-        catch(Exception ex){
-            notification.setStatus(NotificationStatus.FAILED);
-            notification.setFailureReason(ex.getMessage());
-        }
-
-        notificationRepository.save(notification);
-
-    }
-
-    @Override
     public void processPlagiarismNotification(PlagiarismCheckCompletedEvent event) {
 
         Notification notification = Notification.builder()
@@ -67,18 +29,19 @@ public class NotificationServiceImpl implements NotificationService {
                 .message(buildMessage(event))
                 .type(NotificationType.PLAGIARISM)
                 .status(NotificationStatus.PENDING)
+                .read(false)
+                .retryCount(0)
                 .build();
 
         notification = notificationRepository.save(notification);
 
         try {
-//            emailService.send(notification);
             emailService.sendPlagiarismResultEmail(notification, event);
             notification.setStatus(NotificationStatus.SENT);
             notification.setSentAt(LocalDateTime.now());
+            notification.setFailureReason(null);
 
         } catch (Exception ex) {
-
             notification.setStatus(NotificationStatus.FAILED);
             notification.setFailureReason(ex.getMessage());
         }
@@ -115,10 +78,8 @@ public class NotificationServiceImpl implements NotificationService {
             notification.setFailureReason(null);
 
         } catch (Exception ex) {
-
             notification.setStatus(NotificationStatus.FAILED);
             notification.setFailureReason(ex.getMessage());
-
         }
 
         notificationRepository.save(notification);

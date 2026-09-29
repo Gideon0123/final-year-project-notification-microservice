@@ -12,14 +12,10 @@ public interface EmailService {
     void sendPasswordResetEmail(PasswordResetRequestedEvent event);
     void sendGoodbyeEmail(UserDeletedEvent event) throws MessagingException;
 
-    void send(Notification notification) throws MessagingException;
-
     void sendPlagiarismResultEmail(
             Notification notification,
             PlagiarismCheckCompletedEvent event
     );
 
-    void sendReviewNotificationEmail(
-            Notification notification
-    );
+    void sendReviewNotificationEmail(Notification notification);
 }

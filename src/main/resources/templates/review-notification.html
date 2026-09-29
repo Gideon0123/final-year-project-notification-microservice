@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">
+        ResearchHub Notification
+    </title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .content {
+            line-height: 1.7;
+            white-space: pre-line;
+        }
+
+        .type {
+            margin-top: 25px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 13px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1 th:text="${title}">
+            Review Notification
+        </h1>
+    </div>
+
+    <div class="content">
+        <p th:text="${message}">
+            Review notification message.
+        </p>
+    </div>
+
+    <div class="type">
+        Notification Type:
+        <strong th:text="${type}">
+            REVIEW
+        </strong>
+    </div>
+
+    <div class="footer">
+        <p>
+            This is an automated notification from ResearchHub.
+        </p>
+
+        <p>
+            Please do not reply to this email.
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

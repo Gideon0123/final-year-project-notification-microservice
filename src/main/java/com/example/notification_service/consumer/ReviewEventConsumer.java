@@ -15,81 +15,90 @@ public class ReviewEventConsumer {
 
     private final NotificationService notificationService;
 
-    @RabbitListener(
-            queues = RabbitMQConfig.REVIEW_ASSIGNMENT_QUEUE
-    )
-    public void handleReviewAssigned(
-            ReviewAssignedEvent event
-    ){
-        notificationService.notify(
+    @RabbitListener(queues = RabbitMQConfig.REVIEW_ASSIGNMENT_QUEUE)
+    public void handleReviewAssigned(ReviewAssignedEvent event) {
+        notificationService.processReviewNotification(
 
                 event.getReviewerId(),
-
                 event.getReviewerEmail(),
-
                 "New Review Assignment",
 
-                "You have been assigned a new paper to review paper with ID " + event.getPaperId() + " " +
-                        "The deadline for you to accept this review is " + event.getDeadline() + "\n " +
-                        "Details of the review are as follows " + "\n " +
-                        "paper ID: " + event.getPaperId() + "\n " +
-                        "ReviewRound: " + event.getReviewRound() + "\n " +
-                        "RevisionNumber: " + event.getRevisionNumber()  ,
+                "You have been assigned a new paper to review with ID "
+                        + event.getPaperId()
+                        + "\n\n"
+                        + "The deadline for you to accept this review is "
+                        + event.getDeadline()
+                        + "\n\n"
+                        + "Details of the review:"
+                        + "\n"
+                        + "Paper ID: "
+                        + event.getPaperId()
+                        + "\n"
+                        + "Review Round: "
+                        + event.getReviewRound()
+                        + "\n"
+                        + "Revision Number: "
+                        + event.getRevisionNumber(),
 
                 NotificationType.REVIEW_ASSIGNED
         );
-
     }
 
-    @RabbitListener(
-            queues = RabbitMQConfig.REVIEW_ACCEPTED_QUEUE
-    )
-    public void handleAccepted(
-            ReviewAcceptedEvent event
-    ){
-        notificationService.notify(
+    @RabbitListener(queues = RabbitMQConfig.REVIEW_ACCEPTED_QUEUE)
+    public void handleAccepted(ReviewAcceptedEvent event) {
+
+        notificationService.processReviewNotification(
 
                 event.getReviewerId(),
-
                 event.getReviewerEmail(),
 
                 "Review Accepted",
 
-                "You accepted the review invitation." + "\n" +
-                        "Details of the Review are as follows:" + "\n" +
-                        "Review ID: " + event.getReviewId() + "\n" +
-                        "Paper ID: " + event.getPaperId() + "\n" +
-                        "The Review was accepted at: " + event.getAcceptedAt() ,
+                "You accepted the review invitation."
+                        + "\n\n"
+                        + "Details of the review:"
+                        + "\n"
+                        + "Review ID: "
+                        + event.getReviewId()
+                        + "\n"
+                        + "Paper ID: "
+                        + event.getPaperId()
+                        + "\n"
+                        + "Accepted At: "
+                        + event.getAcceptedAt(),
 
                 NotificationType.REVIEW_ACCEPTED
         );
-
     }
 
-    @RabbitListener(
-            queues = RabbitMQConfig.REVIEW_DECLINED_QUEUE
-    )
-    public void handleDeclined(
-            ReviewDeclinedEvent event
-    ){
-        notificationService.notify(
+    @RabbitListener(queues = RabbitMQConfig.REVIEW_DECLINED_QUEUE)
+    public void handleDeclined(ReviewDeclinedEvent event) {
+
+        notificationService.processReviewNotification(
 
                 event.getReviewerId(),
-
                 event.getReviewerEmail(),
 
                 "Review Declined",
 
-                "You Declined the review invitation." + "\n" +
-                        "Details of the Review are as follows:" + "\n" +
-                        "Review ID: " + event.getReviewId() + "\n" +
-                        "Paper ID: " + event.getPaperId() + "\n" +
-                        "Reason: " + event.getReason() + "\n" +
-                        "The Review was accepted at: " + event.getDeclinedAt() ,
+                "You declined the review invitation."
+                        + "\n\n"
+                        + "Details of the review:"
+                        + "\n"
+                        + "Review ID: "
+                        + event.getReviewId()
+                        + "\n"
+                        + "Paper ID: "
+                        + event.getPaperId()
+                        + "\n"
+                        + "Reason: "
+                        + event.getReason()
+                        + "\n"
+                        + "Declined At: "
+                        + event.getDeclinedAt(),
 
                 NotificationType.REVIEW_DECLINED
         );
-
     }
 
     @RabbitListener(
@@ -97,34 +106,42 @@ public class ReviewEventConsumer {
     )
     public void handleDecision(
             EditorialDecisionEvent event
-    ){
+    ) {
+
         String message;
+        NotificationType type;
 
-        switch(event.getDecision()){
+        switch (event.getDecision()) {
 
-            case ACCEPT -> message = "Your paper has been accepted.";
+            case ACCEPT -> {
+                message = "Your paper has been accepted.";
+                type = NotificationType.PAPER_ACCEPTED;
+            }
 
-            case MINOR_REVISION, MAJOR_REVISION -> message = "Your paper requires revision.";
+            case MINOR_REVISION, MAJOR_REVISION -> {
+                message = "Your paper requires revision.";
+                type = NotificationType.PAPER_REVISION_REQUIRED;
+            }
 
-            case REJECT -> message = "Your paper has been rejected.";
+            case REJECT -> {
+                message = "Your paper has been rejected.";
+                type = NotificationType.PAPER_REJECTED;
+            }
 
-            default -> message = "Decision updated.";
-
+            default -> {
+                message = "The editorial decision for your paper has been updated.";
+                type = NotificationType.PAPER_ACCEPTED;
+            }
         }
 
-        notificationService.notify(
+        notificationService.processReviewNotification(
 
                 event.getAuthorId(),
-
                 event.getRecipientEmail(),
-
                 "Editorial Decision",
-
                 message,
-
-                NotificationType.PAPER_ACCEPTED
+                type
         );
-
     }
 
     @RabbitListener(
@@ -132,28 +149,40 @@ public class ReviewEventConsumer {
     )
     public void handleSubmitted(
             ReviewSubmittedEvent event
-    ){
-        notificationService.notify(
+    ) {
+
+        notificationService.processReviewNotification(
 
                 event.getReviewerId(),
-
                 event.getReviewerEmail(),
-
                 "Review Submitted",
-
-                "\"Your review has been successfully submitted." + "\n" +
-                        "Details of the Review are as follows:" + "\n" +
-                        "Review ID: " + event.getReviewId() + "\n" +
-                        "Paper ID: " + event.getPaperId() + "\n" +
-                        "OverallScore: " + event.getOverallScore().toString() + "\n" +
-                        "Recommendation: " + event.getRecommendation().toString() + "\n" +
-                        "Editorial Attention Reason: " + event.getEditorialAttentionReason() + "\n" +
-                        "Requires Editorial Attention? " + event.getRequiresEditorialAttention() + "\n" +
-                        "The Review was accepted at: " + event.getSubmittedAt() ,
+                "Your review has been successfully submitted."
+                        + "\n\n"
+                        + "Details of the review:"
+                        + "\n"
+                        + "Review ID: "
+                        + event.getReviewId()
+                        + "\n"
+                        + "Paper ID: "
+                        + event.getPaperId()
+                        + "\n"
+                        + "Overall Score: "
+                        + event.getOverallScore()
+                        + "\n"
+                        + "Recommendation: "
+                        + event.getRecommendation()
+                        + "\n"
+                        + "Editorial Attention Reason: "
+                        + event.getEditorialAttentionReason()
+                        + "\n"
+                        + "Requires Editorial Attention? "
+                        + event.getRequiresEditorialAttention()
+                        + "\n"
+                        + "Submitted At: "
+                        + event.getSubmittedAt(),
 
                 NotificationType.REVIEW_SUBMITTED
         );
-
     }
 
     @RabbitListener(
@@ -161,24 +190,28 @@ public class ReviewEventConsumer {
     )
     public void handleRevision(
             RevisionRequestedEvent event
-    ){
-        notificationService.notify(
+    ) {
+
+        notificationService.processReviewNotification(
 
                 event.getAuthorId(),
-
                 event.getAuthorEmail(),
-
                 "Revision Requested",
-
-                "Review Revision was Requested." + "\n" +
-                        "Details of the Review are as follows:" + "\n" +
-                        "Paper ID: " + event.getPaperId() + "\n" +
-                        "Revision Number: " + event.getRevisionNumber() + "\n" +
-                        "The Review was accepted at: " + event.getSubmittedAt() ,
+                "A revision has been requested for your paper."
+                        + "\n\n"
+                        + "Details of the review:"
+                        + "\n"
+                        + "Paper ID: "
+                        + event.getPaperId()
+                        + "\n"
+                        + "Revision Number: "
+                        + event.getRevisionNumber()
+                        + "\n"
+                        + "Requested At: "
+                        + event.getSubmittedAt(),
 
                 NotificationType.PAPER_REVISION_REQUIRED
         );
-
     }
 
     @RabbitListener(
@@ -186,24 +219,28 @@ public class ReviewEventConsumer {
     )
     public void handleReminder(
             ReviewReminderEvent event
-    ){
-        notificationService.notify(
+    ) {
+
+        notificationService.processReviewNotification(
 
                 event.getReviewerId(),
-
                 event.getReviewerEmail(),
-
-                "Revision Reminder",
-
-                "This is a reminder that your assigned review is approaching its deadline." + "\n" +
-                        "Details of the Review are as follows:" + "\n" +
-                        "Review ID: " + event.getReviewId() + "\n" +
-                        "Paper ID: " + event.getPaperId() + "\n" +
-                        "Deadline: " + event.getDeadline(),
+                "Review Reminder",
+                "This is a reminder that your assigned review is approaching its deadline."
+                        + "\n\n"
+                        + "Details of the review:"
+                        + "\n"
+                        + "Review ID: "
+                        + event.getReviewId()
+                        + "\n"
+                        + "Paper ID: "
+                        + event.getPaperId()
+                        + "\n"
+                        + "Deadline: "
+                        + event.getDeadline(),
 
                 NotificationType.REVIEW_REMINDER
         );
-
     }
 
     @RabbitListener(
@@ -213,7 +250,7 @@ public class ReviewEventConsumer {
             ReviewEscalationEvent event
     ) {
 
-        notificationService.notify(
+        notificationService.processReviewNotification(
 
                 event.getReviewerId(),
 

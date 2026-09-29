@@ -5,7 +5,6 @@ import com.example.notification_service.entity.Notification;
 import com.example.notification_service.enums.NotificationStatus;
 import com.example.notification_service.enums.NotificationType;
 import com.example.notification_service.repository.NotificationRepository;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -255,26 +254,6 @@ public class EmailServiceImpl implements EmailService {
             UserDeletedEvent event
     ) {
         log.error("Goodbye email permanently failed for {}", event.email(), ex);
-    }
-
-    @Override
-    public void send(
-            Notification notification
-    ) throws MessagingException {
-        Context context = new Context();
-        context.setVariable("title", notification.getTitle());
-        context.setVariable("message", notification.getMessage());
-        context.setVariable("recipient", notification.getRecipientEmail());
-        context.setVariable("type", notification.getType());
-        String html = templateEngine.process("emails/notification", context);
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(
-                mimeMessage, true, StandardCharsets.UTF_8.name()
-        );
-        helper.setTo(notification.getRecipientEmail());
-        helper.setSubject(notification.getTitle());
-        helper.setText(html, true);
-        mailSender.send(mimeMessage);
     }
 
     @Override
